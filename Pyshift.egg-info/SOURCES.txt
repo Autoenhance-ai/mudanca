@@ -1,0 +1,7 @@
+setup.py
+Pyshift.egg-info/PKG-INFO
+Pyshift.egg-info/SOURCES.txt
+Pyshift.egg-info/dependency_links.txt
+Pyshift.egg-info/top_level.txt
+src/ashift.c
+src/pyshiftmodule.c
