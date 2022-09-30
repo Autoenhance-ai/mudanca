@@ -35,3 +35,16 @@ def adjust(img, lsd_results: tuple):
         line_count,
         rects
     )
+
+def adjust_lsd(img):
+    height, width, _ = img.shape
+
+    #cdef Pool mem = Pool()
+    #cdef float* pixels = <float*>mem.alloc(height * width * 3, sizeof(float))
+
+    #pixels = img.flatten()
+
+    ashift.shift_lsd(
+        [],
+        width, height,
+    )

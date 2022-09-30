@@ -9,8 +9,5 @@ cdef extern from "ashift.h":
         double prec;
         double p;
 
-    void shift(
-        float width, float height,
-        int input_line_count,
-        rect rects[],
-    );
+    void shift_lsd(float *img, float width, float height);
+    void shift(float width, float height, int input_line_count, rect rects[]);

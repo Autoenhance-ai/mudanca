@@ -2302,3 +2302,68 @@ void shift(
     // finally apply cropping
     do_crop(&g, &p);
 }
+
+
+void shift_lsd(
+    float *in, 
+    float width, float height
+) {
+    printf("Shift\n");
+    printf("Width: %f\n", width);
+    printf("Height: %f\n", height);
+
+    dt_iop_ashift_line_t *lines;
+    int lines_count;
+    int vertical_count;
+    int horizontal_count;
+    float vertical_weight;
+    float horizontal_weight;
+
+    dt_iop_ashift_enhance_t enhance = ASHIFT_ENHANCE_NONE;
+
+   printf("Line Detect: %i\n", line_detect(
+        in, 
+        width, height,
+        0.0f, 0.0f, // TODO: Work out what these parameters do
+        1.0f, // TODO: Work out what these parameters do
+        &lines, &lines_count,
+        &vertical_count, &horizontal_count, &vertical_weight, &horizontal_weight,
+        enhance, FALSE
+    ));
+
+    dt_iop_ashift_gui_data_t g;
+
+    g.lines_in_width = width;
+    g.lines_in_height = height;
+    g.lines_x_off = 0.0f; // TODO: Work out what these parameters do
+    g.lines_y_off = 0.0f; // TODO: Work out what these parameters do
+    g.lines = lines;
+    g.lines_count = lines_count;
+
+    printf("Processed Line Count: %i\n", lines_count);
+    printf("Proccessed Outliers: %i\n", _remove_outliers(&g));
+    printf("Outlier Line Count: %i\n", lines_count);
+
+    dt_iop_ashift_params_t p;
+    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
+
+    dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
+
+    switch(res)
+    {
+      case NMS_NOT_ENOUGH_LINES:
+        printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction",
+            MINIMUM_FITLINES);
+        return;
+      case NMS_DID_NOT_CONVERGE:
+      case NMS_INSANE:
+        printf("automatic correction failed, please correct manually");
+        return;
+      case NMS_SUCCESS:
+      default:
+        break;
+    }
+
+    // finally apply cropping
+    do_crop(&g, &p);
+}
