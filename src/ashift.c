@@ -2308,7 +2308,7 @@ void shift_lsd(
     float *in, 
     float width, float height
 ) {
-    printf("Shift\n");
+    printf("\nShift\n");
     printf("Width: %f\n", width);
     printf("Height: %f\n", height);
 

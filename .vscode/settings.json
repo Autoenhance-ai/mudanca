@@ -21,6 +21,9 @@
         "functional": "c",
         "iterator": "c",
         "memory": "c",
-        "cassert": "c"
+        "cassert": "c",
+        "__locale": "c",
+        "ios": "c",
+        "variant": "c"
     }
 }

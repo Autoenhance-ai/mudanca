@@ -42,7 +42,9 @@ def adjust(img, lsd_results: tuple):
 def adjust_lsd(img):
     height, width, _ = img.shape
 
-    cdef array.array pixels = array.array('f', img.flatten())
+    image_data = img.flatten()
+
+    cdef array.array pixels = array.array('f', image_data)
 
     ashift.shift_lsd(
         pixels.data.as_floats,

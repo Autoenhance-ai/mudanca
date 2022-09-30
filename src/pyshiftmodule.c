@@ -1694,6 +1694,7 @@ static const char __pyx_k_line_id[] = "line_id";
 static const char __pyx_k_pyshift[] = "pyshift";
 static const char __pyx_k_precision[] = "precision";
 static const char __pyx_k_adjust_lsd[] = "adjust_lsd";
+static const char __pyx_k_image_data[] = "image_data";
 static const char __pyx_k_line_count[] = "line_count";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_MemoryError[] = "MemoryError";
@@ -1709,6 +1710,7 @@ static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_u_f;
 static PyObject *__pyx_n_s_flatten;
 static PyObject *__pyx_n_s_height;
+static PyObject *__pyx_n_s_image_data;
 static PyObject *__pyx_n_s_img;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_line_count;
@@ -2338,6 +2340,7 @@ static PyObject *__pyx_pf_7pyshift_2adjust_lsd(CYTHON_UNUSED PyObject *__pyx_sel
   PyObject *__pyx_v_height = NULL;
   PyObject *__pyx_v_width = NULL;
   CYTHON_UNUSED PyObject *__pyx_v__ = NULL;
+  PyObject *__pyx_v_image_data = NULL;
   arrayobject *__pyx_v_pixels = 0;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -2359,7 +2362,7 @@ static PyObject *__pyx_pf_7pyshift_2adjust_lsd(CYTHON_UNUSED PyObject *__pyx_sel
  * def adjust_lsd(img):
  *     height, width, _ = img.shape             # <<<<<<<<<<<<<<
  * 
- *     cdef array.array pixels = array.array('f', img.flatten())
+ *     image_data = img.flatten()
  */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_img, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -2426,9 +2429,9 @@ static PyObject *__pyx_pf_7pyshift_2adjust_lsd(CYTHON_UNUSED PyObject *__pyx_sel
   /* "src/pyshiftmodule.pyx":45
  *     height, width, _ = img.shape
  * 
- *     cdef array.array pixels = array.array('f', img.flatten())             # <<<<<<<<<<<<<<
+ *     image_data = img.flatten()             # <<<<<<<<<<<<<<
  * 
- *     ashift.shift_lsd(
+ *     cdef array.array pixels = array.array('f', image_data)
  */
   __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_img, __pyx_n_s_flatten); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
@@ -2447,31 +2450,41 @@ static PyObject *__pyx_pf_7pyshift_2adjust_lsd(CYTHON_UNUSED PyObject *__pyx_sel
   if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_INCREF(__pyx_n_u_f);
-  __Pyx_GIVEREF(__pyx_n_u_f);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_n_u_f);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_v_pixels = ((arrayobject *)__pyx_t_1);
+  __pyx_v_image_data = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "src/pyshiftmodule.pyx":49
+  /* "src/pyshiftmodule.pyx":47
+ *     image_data = img.flatten()
+ * 
+ *     cdef array.array pixels = array.array('f', image_data)             # <<<<<<<<<<<<<<
+ * 
+ *     ashift.shift_lsd(
+ */
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_u_f);
+  __Pyx_GIVEREF(__pyx_n_u_f);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_f);
+  __Pyx_INCREF(__pyx_v_image_data);
+  __Pyx_GIVEREF(__pyx_v_image_data);
+  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_image_data);
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_7cpython_5array_array), __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_pixels = ((arrayobject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "src/pyshiftmodule.pyx":51
  *     ashift.shift_lsd(
  *         pixels.data.as_floats,
  *         width, height,             # <<<<<<<<<<<<<<
  *     )
  */
-  __pyx_t_7 = __pyx_PyFloat_AsFloat(__pyx_v_width); if (unlikely((__pyx_t_7 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
-  __pyx_t_8 = __pyx_PyFloat_AsFloat(__pyx_v_height); if (unlikely((__pyx_t_8 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsFloat(__pyx_v_width); if (unlikely((__pyx_t_7 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsFloat(__pyx_v_height); if (unlikely((__pyx_t_8 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
 
-  /* "src/pyshiftmodule.pyx":47
- *     cdef array.array pixels = array.array('f', img.flatten())
+  /* "src/pyshiftmodule.pyx":49
+ *     cdef array.array pixels = array.array('f', image_data)
  * 
  *     ashift.shift_lsd(             # <<<<<<<<<<<<<<
  *         pixels.data.as_floats,
@@ -2502,6 +2515,7 @@ static PyObject *__pyx_pf_7pyshift_2adjust_lsd(CYTHON_UNUSED PyObject *__pyx_sel
   __Pyx_XDECREF(__pyx_v_height);
   __Pyx_XDECREF(__pyx_v_width);
   __Pyx_XDECREF(__pyx_v__);
+  __Pyx_XDECREF(__pyx_v_image_data);
   __Pyx_XDECREF((PyObject *)__pyx_v_pixels);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -3215,6 +3229,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_u_f, __pyx_k_f, sizeof(__pyx_k_f), 0, 1, 0, 1},
   {&__pyx_n_s_flatten, __pyx_k_flatten, sizeof(__pyx_k_flatten), 0, 0, 1, 1},
   {&__pyx_n_s_height, __pyx_k_height, sizeof(__pyx_k_height), 0, 0, 1, 1},
+  {&__pyx_n_s_image_data, __pyx_k_image_data, sizeof(__pyx_k_image_data), 0, 0, 1, 1},
   {&__pyx_n_s_img, __pyx_k_img, sizeof(__pyx_k_img), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_line_count, __pyx_k_line_count, sizeof(__pyx_k_line_count), 0, 0, 1, 1},
@@ -3275,10 +3290,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *     height, width, _ = img.shape
  * 
  */
-  __pyx_tuple__4 = PyTuple_Pack(5, __pyx_n_s_img, __pyx_n_s_height, __pyx_n_s_width, __pyx_n_s_, __pyx_n_s_pixels); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(6, __pyx_n_s_img, __pyx_n_s_height, __pyx_n_s_width, __pyx_n_s_, __pyx_n_s_image_data, __pyx_n_s_pixels); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_pyshiftmodule_pyx, __pyx_n_s_adjust_lsd, 42, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(1, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_pyshiftmodule_pyx, __pyx_n_s_adjust_lsd, 42, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
