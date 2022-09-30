@@ -17,6 +17,11 @@ lsd_results = lsd.detect(img)
 
 pyshift.adjust(img, lsd_results)
 
+img = cv2.imread('example.jpeg') 
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+pyshift.adjust_lsd(img)
+
 # img_result = pyshift.adjust(img, lsd_results)
 
 
