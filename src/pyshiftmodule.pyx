@@ -1,4 +1,7 @@
 cimport ashift
+from cpython cimport array
+import array
+import numpy as np
 from cymem.cymem cimport Pool
 
 # TODO: 
@@ -39,12 +42,9 @@ def adjust(img, lsd_results: tuple):
 def adjust_lsd(img):
     height, width, _ = img.shape
 
-    #cdef Pool mem = Pool()
-    #cdef float* pixels = <float*>mem.alloc(height * width * 3, sizeof(float))
-
-    #pixels = img.flatten()
+    cdef array.array pixels = array.array('f', img.flatten())
 
     ashift.shift_lsd(
-        [],
+        pixels.data.as_floats,
         width, height,
     )
