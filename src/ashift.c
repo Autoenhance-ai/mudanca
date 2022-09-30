@@ -2284,6 +2284,8 @@ void shift(
 
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
 
+    printf("Result: %i\n", res);
+
     switch(res)
     {
       case NMS_NOT_ENOUGH_LINES:
@@ -2348,6 +2350,8 @@ void shift_lsd(
     dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
 
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
+
+    printf("Result: %i\n", res);
 
     switch(res)
     {
