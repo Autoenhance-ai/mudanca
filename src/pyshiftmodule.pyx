@@ -7,15 +7,16 @@ from dataclasses import dataclass
 
 from cymem.cymem cimport Pool
 
-LSD_SCALE = 0.99            # LSD: scaling factor for line detection
-LSD_SIGMA_SCALE = 0.6       # LSD: sigma for Gaussian filter is computed as sigma = sigma_scale/scale
-LSD_QUANT = 2.0             # LSD: bound to the quantization error on the gradient norm
-LSD_ANG_TH = 22.5           # LSD: gradient angle tolerance in degrees
-LSD_LOG_EPS = 0.0           # LSD: detection threshold: -log10(NFA) > log_eps
-LSD_DENSITY_TH = 0.7        # LSD: minimal density of region points in rectangle
-LSD_N_BINS = 1024           # LSD: number of bins in pseudo-ordering of gradient modulus
-LINE_DETECTION_MARGIN = 5   # Size of the margin from the border of the image where lines will be discarded
-MIN_LINE_LENGTH = 5         # the minimum length of a line in pixels to be regarded as relevant
+LSD_SCALE = 0.99                # LSD: scaling factor for line detection
+LSD_SIGMA_SCALE = 0.6           # LSD: sigma for Gaussian filter is computed as sigma = sigma_scale/scale
+LSD_QUANT = 2.0                 # LSD: bound to the quantization error on the gradient norm
+LSD_ANG_TH = 22.5               # LSD: gradient angle tolerance in degrees
+LSD_LOG_EPS = 0.0               # LSD: detection threshold: -log10(NFA) > log_eps
+LSD_DENSITY_TH = 0.7            # LSD: minimal density of region points in rectangle
+LSD_N_BINS = 1024               # LSD: number of bins in pseudo-ordering of gradient modulus
+LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the image where lines will be discarded
+MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
+MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 
 @dataclass
 class Line:
@@ -101,6 +102,9 @@ def adjust_ported(img):
 
         # normalaze line coordinates so that x^2 + y^2 = 1
         # (this will always succeed as L is a real line connecting two real points)
+        #
+        # TODO: Not sure what this does
+        #
         #vec3lnorm(ashift_lines[lct].L, ashift_lines[lct].L);
 
         # length and width of rectangle (see LSD)
@@ -109,28 +113,36 @@ def adjust_ported(img):
         # ...  and weight (= length * width * angle precision)
         line.weight = line.length * line.width * precs[i][0];
 
-        #angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
-        #vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
-        #horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
+        angle = np.angle(line.p2 - line.p1)
 
-        if line.length > MIN_LINE_LENGTH:
+        vertical = False
+        horizontal = False
+
+        if True: # fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
+            vertical = True
+
+        if True: # fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
+            horizontal = True
+
+        relevant = line.length > MIN_LINE_LENGTH
+
+        if relevant and vertical:
 
             # TODO: Tag as Vertical Etc.
             #
             lines.append(line)
 
-        #if(vertical && relevant)
-        #{
             #type = ASHIFT_LINE_VERTICAL_SELECTED;
             #vertical_count++;
             #vertical_weight += weight;
-        #}
-        #else if(horizontal && relevant)
-        #{
+
+        elif relevant and horizontal:
+
+            lines.append(line)
+
             #type = ASHIFT_LINE_HORIZONTAL_SELECTED;
             #horizontal_count++;
             #horizontal_weight += weight;
-        #}
 
 # TODO: 
 # - Validate Input
