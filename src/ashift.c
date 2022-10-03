@@ -27,6 +27,8 @@
 #include <string.h>
 #include <assert.h>
 
+#define DT_ALIGNED_ARRAY __attribute__((aligned(64)))
+
 typedef enum {FALSE = 0, TRUE} boolean;
 
 #ifndef MIN
@@ -2197,18 +2199,6 @@ float* shift(
     float vertical_weight;
     float horizontal_weight;
 
-    float errorResult[] = {
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    };
-
    printf("Line Process: %i\n", line_prcoess(
         input_line_count,
         rects,
@@ -2266,11 +2256,13 @@ float* shift(
       case NMS_NOT_ENOUGH_LINES:
         printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
             MINIMUM_FITLINES);
-        return errorResult;
+        error("Failed");
+        break;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
         printf("automatic correction failed, please correct manually\n");
-        return errorResult;
+        error("Failed");
+        break;
       case NMS_SUCCESS:
       default:
         printf("Success\n");
@@ -2290,18 +2282,11 @@ float* shift(
     printf("CT: %f\n", p.ct);
     printf("CB: %f\n", p.cb);
 
-    float result[] = {
-      p.rotation,
-      p.lensshift_v,
-      p.lensshift_h,
-      p.shear,
-      p.cl,
-      p.cr,
-      p.ct,
-      p.cb
-    };
+    float DT_ALIGNED_ARRAY homograph[3][3];
+    homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
+              100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
 
-    return result;
+    return homograph;
   };
 
 
@@ -2319,18 +2304,6 @@ float* shift_lsd(
     int horizontal_count;
     float vertical_weight;
     float horizontal_weight;
-
-    float errorResult[] = {
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    };
 
     dt_iop_ashift_enhance_t enhance = ASHIFT_ENHANCE_NONE;
 
@@ -2390,11 +2363,13 @@ float* shift_lsd(
       case NMS_NOT_ENOUGH_LINES:
         printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction",
             MINIMUM_FITLINES);
-        return errorResult;
+        error("Failed");
+        break;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
         printf("automatic correction failed, please correct manually");
-        return errorResult;
+        error("Failed");
+        break;
       case NMS_SUCCESS:
       default:
         printf("Success\n");
@@ -2414,16 +2389,9 @@ float* shift_lsd(
     printf("CT: %f\n", p.ct);
     printf("CB: %f\n", p.cb);
 
-    float result[] = {
-      p.rotation,
-      p.lensshift_v,
-      p.lensshift_h,
-      p.shear,
-      p.cl,
-      p.cr,
-      p.ct,
-      p.cb
-    };
+    float DT_ALIGNED_ARRAY homograph[3][3];
+    homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
+              100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
 
-    return result;
+    return homograph;
 };
