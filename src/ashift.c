@@ -2266,6 +2266,10 @@ void shift(
 
     dt_iop_ashift_gui_data_t g;
 
+    g.rotation_range = ROTATION_RANGE_SOFT;
+    g.lensshift_v_range = LENSSHIFT_RANGE_SOFT;
+    g.lensshift_h_range = LENSSHIFT_RANGE_SOFT;
+    g.shear_range = SHEAR_RANGE_SOFT;
     g.lines_in_width = width;
     g.lines_in_height = height;
     g.lines_x_off = 0.0f; // TODO: Work out what these parameters do
@@ -2364,6 +2368,10 @@ void shift_lsd(
 
     dt_iop_ashift_gui_data_t g;
 
+    g.rotation_range = ROTATION_RANGE_SOFT;
+    g.lensshift_v_range = LENSSHIFT_RANGE_SOFT;
+    g.lensshift_h_range = LENSSHIFT_RANGE_SOFT;
+    g.shear_range = SHEAR_RANGE_SOFT;
     g.lines_in_width = width;
     g.lines_in_height = height;
     g.lines_x_off = 0.0f; // TODO: Work out what these parameters do
