@@ -2093,6 +2093,8 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
   // skip if fitting is still running
   if(g->fitting) return;
 
+  printf('Checks Completed\n');
+
   // reset fit margins if auto-cropping is off
   if(p->cropmode == ASHIFT_CROP_OFF)
   {
@@ -2177,6 +2179,8 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
     cropfit.alpha = atan2f((float)cropfit.height, (float)cropfit.width);
     pcount = 2;
   }
+
+  printf("Simplex\n");
 
   // start the simplex fit
   const int iter = simplex(crop_fitness, params, pcount, NMS_CROP_EPSILON, NMS_CROP_SCALE, NMS_CROP_ITERATIONS,
@@ -2280,6 +2284,22 @@ void shift(
     printf("Outlier Line Count: %i\n", lines_count);
 
     dt_iop_ashift_params_t p;
+
+    p.rotation = 0;
+    p.lensshift_v = 0;
+    p.lensshift_h = 0;
+    p.shear = 0;
+    p.f_length = DEFAULT_F_LENGTH;
+    p.crop_factor = 1.0;
+    p.orthocorr = 100;
+    p.aspect = 1.0;
+    p.mode = ASHIFT_MODE_GENERIC;
+    p.cropmode = ASHIFT_CROP_LARGEST;
+    p.cl = 0.0;
+    p.cr = 1.0;
+    p.ct = 0.0;
+    p.cb = 1.0;
+
     dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
 
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
@@ -2289,15 +2309,16 @@ void shift(
     switch(res)
     {
       case NMS_NOT_ENOUGH_LINES:
-        printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction",
+        printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
             MINIMUM_FITLINES);
         return;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
-        printf("automatic correction failed, please correct manually");
+        printf("automatic correction failed, please correct manually\n");
         return;
       case NMS_SUCCESS:
       default:
+        printf("Success\n");
         break;
     }
 
@@ -2347,6 +2368,22 @@ void shift_lsd(
     printf("Outlier Line Count: %i\n", lines_count);
 
     dt_iop_ashift_params_t p;
+
+    p.rotation = 0;
+    p.lensshift_v = 0;
+    p.lensshift_h = 0;
+    p.shear = 0;
+    p.f_length = DEFAULT_F_LENGTH;
+    p.crop_factor = 1.0;
+    p.orthocorr = 100;
+    p.aspect = 1.0;
+    p.mode = ASHIFT_MODE_GENERIC;
+    p.cropmode = ASHIFT_CROP_LARGEST;
+    p.cl = 0.0;
+    p.cr = 1.0;
+    p.ct = 0.0;
+    p.cb = 1.0;
+
     dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
 
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
@@ -2365,6 +2402,7 @@ void shift_lsd(
         return;
       case NMS_SUCCESS:
       default:
+        printf("Success\n");
         break;
     }
 
