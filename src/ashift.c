@@ -1703,6 +1703,8 @@ static double model_fitness(double *params, void *data)
     // get scalar product of line L with orthogonal axis A -> gives 0 if line is perpendicular
     float s = vec3scalar(L, A);
 
+    printf("Scalar: %f\n", s);
+
     // sum up weighted s^2 for both directions individually
     sumsq_v += isvertical ? s * s * lines[n].weight : 0.0;
     weight_v  += isvertical ? lines[n].weight : 0.0;

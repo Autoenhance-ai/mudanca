@@ -15,11 +15,14 @@ LSD_LOG_EPS = 0.0           # LSD: detection threshold: -log10(NFA) > log_eps
 LSD_DENSITY_TH = 0.7        # LSD: minimal density of region points in rectangle
 LSD_N_BINS = 1024           # LSD: number of bins in pseudo-ordering of gradient modulus
 LINE_DETECTION_MARGIN = 5   # Size of the margin from the border of the image where lines will be discarded
+MIN_LINE_LENGTH = 5         # the minimum length of a line in pixels to be regarded as relevant
 
 @dataclass
 class Line:
     p1: (float, float, float)
-    p2: (float, floa, float)
+    p2: (float, float, float)
+    connecting_line: (float, float, float)
+
     length: float
     width: float
     weight: float
@@ -92,28 +95,31 @@ def adjust_ported(img):
             continue
 
         # calculate homogeneous coordinates of connecting line (defined by the two points)
-        #vec3prodn(ashift_lines[lct].L, ashift_lines[lct].p1, ashift_lines[lct].p2);
+        line.connecting_line = np.cross(line.p1, line.p2)
 
         # normalaze line coordinates so that x^2 + y^2 = 1
         # (this will always succeed as L is a real line connecting two real points)
         #vec3lnorm(ashift_lines[lct].L, ashift_lines[lct].L);
 
         # length and width of rectangle (see LSD)
-        #ashift_lines[lct].length = sqrt((px2 - px1) * (px2 - px1) + (py2 - py1) * (py2 - py1));
-        line.length = 0
+        line.length = sqrt((px2 - px1) * (px2 - px1) + (py2 - py1) * (py2 - py1));
         line.width = widths[i][0]
 
         # ...  and weight (= length * width * angle precision)
         line.weight = line.length * line.width * precs[i][0];
 
-        #const float angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
-        #const int vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
-        #const int horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
+        angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
+        vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
+        horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
 
-        #const int relevant = ashift_lines[lct].length > MIN_LINE_LENGTH ? 1 : 0;
+        relevant = if line.length > MIN_LINE_LENGTH 1 else 0;
 
-        #// register type of line
-        #dt_iop_ashift_linetype_t type = ASHIFT_LINE_IRRELEVANT;
+        if relevant:
+
+            # TODO: Tag as Vertical Etc.
+            #
+            lines.append(line)
+
         #if(vertical && relevant)
         #{
             #type = ASHIFT_LINE_VERTICAL_SELECTED;
@@ -126,9 +132,6 @@ def adjust_ported(img):
             #horizontal_count++;
             #horizontal_weight += weight;
         #}
-        #ashift_lines[lct].type = type;
-
-        lines.append(line)
 
 # TODO: 
 # - Validate Input
