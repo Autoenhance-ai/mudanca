@@ -40,6 +40,7 @@ def adjust(img, lsd_results: tuple):
     )
 
     print(results)
+    rotation, lens_shift_v, lens_shift_h, shear, cl, cr, ct, cb = results
 
 def adjust_lsd(img):
     height, width, _ = img.shape
@@ -54,3 +55,4 @@ def adjust_lsd(img):
     )
 
     print(results)
+    rotation, lens_shift_v, lens_shift_h, shear, cl, cr, ct, cb = results
