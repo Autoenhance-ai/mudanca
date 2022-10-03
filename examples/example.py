@@ -3,7 +3,19 @@ import pyshift
 import numpy as np
 
 img = cv2.imread('example.jpeg', 0)
-lsd = cv2.createLineSegmentDetector(0)
+
+# These Parameters are taken from Darktable's LSD
+#
+lsd = cv2.createLineSegmentDetector(
+    1,
+    0.99,
+    0.6,
+    2.0,
+    22.5,
+    0.0,
+    0.7,
+    1024
+)
 
 lsd_results = lsd.detect(img)
 pyshift.adjust(img, lsd_results)
