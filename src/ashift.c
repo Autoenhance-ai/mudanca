@@ -2236,8 +2236,9 @@ failed:
   return;
 }
 
-
-void shift(
+// TODO: Figure out the coordinate space
+//
+float* shift(
     float width, float height,
     int input_line_count,
     rect rects[]
@@ -2253,6 +2254,18 @@ void shift(
     int horizontal_count;
     float vertical_weight;
     float horizontal_weight;
+
+    float errorResult[] = {
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    };
 
    printf("Line Process: %i\n", line_prcoess(
         input_line_count,
@@ -2311,11 +2324,11 @@ void shift(
       case NMS_NOT_ENOUGH_LINES:
         printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
             MINIMUM_FITLINES);
-        return;
+        return errorResult;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
         printf("automatic correction failed, please correct manually\n");
-        return;
+        return errorResult;
       case NMS_SUCCESS:
       default:
         printf("Success\n");
@@ -2325,8 +2338,6 @@ void shift(
     // finally apply cropping
     do_crop(&g, &p);
 
-    // TODO: Return Parameters as returned from G
-    //
     printf("R: %f\n", p.rotation);
     printf("LV: %f\n", p.lensshift_v);
     printf("LH: %f\n", p.lensshift_h);
@@ -2336,10 +2347,23 @@ void shift(
     printf("CR: %f\n", p.cr);
     printf("CT: %f\n", p.ct);
     printf("CB: %f\n", p.cb);
-  }
+
+    float result[] = {
+      p.rotation,
+      p.lensshift_v,
+      p.lensshift_h,
+      p.shear,
+      p.cl,
+      p.cr,
+      p.ct,
+      p.cb
+    };
+
+    return result;
+  };
 
 
-void shift_lsd(
+float* shift_lsd(
     float *in, 
     float width, float height
 ) {
@@ -2353,6 +2377,18 @@ void shift_lsd(
     int horizontal_count;
     float vertical_weight;
     float horizontal_weight;
+
+    float errorResult[] = {
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    };
 
     dt_iop_ashift_enhance_t enhance = ASHIFT_ENHANCE_NONE;
 
@@ -2413,11 +2449,11 @@ void shift_lsd(
       case NMS_NOT_ENOUGH_LINES:
         printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction",
             MINIMUM_FITLINES);
-        return;
+        return errorResult;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
         printf("automatic correction failed, please correct manually");
-        return;
+        return errorResult;
       case NMS_SUCCESS:
       default:
         printf("Success\n");
@@ -2427,8 +2463,6 @@ void shift_lsd(
     // finally apply cropping
     do_crop(&g, &p);
 
-    // TODO: Return Parameters as returned from G
-    //
     printf("R: %f\n", p.rotation);
     printf("LV: %f\n", p.lensshift_v);
     printf("LH: %f\n", p.lensshift_h);
@@ -2438,4 +2472,17 @@ void shift_lsd(
     printf("CR: %f\n", p.cr);
     printf("CT: %f\n", p.ct);
     printf("CB: %f\n", p.cb);
-}
+
+    float result[] = {
+      p.rotation,
+      p.lensshift_v,
+      p.lensshift_h,
+      p.shear,
+      p.cl,
+      p.cr,
+      p.ct,
+      p.cb
+    };
+
+    return result;
+};
