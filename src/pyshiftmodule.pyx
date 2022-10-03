@@ -33,13 +33,13 @@ def adjust(img, lsd_results: tuple):
 
         rects[line_id] = rect
 
-    # TODO: Handle returned Parameters 
-    #
-    results = ashift.shift(
+    results: float[8] = ashift.shift(
         width, height,
         line_count,
         rects
     )
+
+    print(results)
 
 def adjust_lsd(img):
     height, width, _ = img.shape
@@ -48,9 +48,9 @@ def adjust_lsd(img):
 
     cdef array.array pixels = array.array('f', image_data)
 
-    # TODO: Handle returned Parameters 
-    #
-    results = ashift.shift_lsd(
+    results: float[8] = ashift.shift_lsd(
         pixels.data.as_floats,
         width, height,
     )
+
+    print(results)
