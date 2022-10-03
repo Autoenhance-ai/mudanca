@@ -219,64 +219,6 @@ typedef enum dt_iop_ashift_jobcode_t
   ASHIFT_JOBCODE_DO_CROP = 5
 } dt_iop_ashift_jobcode_t;
 
-typedef struct dt_iop_ashift_params1_t
-{
-  float rotation;
-  float lensshift_v;
-  float lensshift_h;
-  int toggle;
-} dt_iop_ashift_params1_t;
-
-typedef struct dt_iop_ashift_params2_t
-{
-  float rotation;
-  float lensshift_v;
-  float lensshift_h;
-  float f_length;
-  float crop_factor;
-  float orthocorr;
-  float aspect;
-  dt_iop_ashift_mode_t mode;
-  int toggle;
-} dt_iop_ashift_params2_t;
-
-typedef struct dt_iop_ashift_params3_t
-{
-  float rotation;
-  float lensshift_v;
-  float lensshift_h;
-  float f_length;
-  float crop_factor;
-  float orthocorr;
-  float aspect;
-  dt_iop_ashift_mode_t mode;
-  int toggle;
-  dt_iop_ashift_crop_t cropmode;
-  float cl;
-  float cr;
-  float ct;
-  float cb;
-} dt_iop_ashift_params3_t;
-
-typedef struct dt_iop_ashift_params4_t
-{
-  float rotation;
-  float lensshift_v;
-  float lensshift_h;
-  float shear;
-  float f_length;
-  float crop_factor;
-  float orthocorr;
-  float aspect;
-  dt_iop_ashift_mode_t mode;
-  int toggle;
-  dt_iop_ashift_crop_t cropmode;
-  float cl;
-  float cr;
-  float ct;
-  float cb;
-} dt_iop_ashift_params4_t;
-
 typedef struct dt_iop_ashift_params_t
 {
   float rotation;    // $MIN: -ROTATION_RANGE_SOFT $MAX: ROTATION_RANGE_SOFT $DEFAULT: 0.0
