@@ -2,11 +2,6 @@ import cv2
 import pyshift
 import numpy as np
 
-img = cv2.imread('example.jpeg', 0)
-lsd = cv2.createLineSegmentDetector(0)
-
-lsd_results = lsd.detect(img)
-
 # print(results)
 # print(results[1])
 # print(results[2])
@@ -15,12 +10,15 @@ lsd_results = lsd.detect(img)
 
 # img_with_lines = lsd.drawSegments(img, lines)
 
-pyshift.adjust(img, lsd_results)
-
 img = cv2.imread('example.jpeg') 
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
 pyshift.adjust_lsd(img)
+
+img = cv2.imread('example.jpeg', 0)
+lsd = cv2.createLineSegmentDetector(0)
+
+lsd_results = lsd.detect(img)
+pyshift.adjust(img, lsd_results)
 
 # img_result = pyshift.adjust(img, lsd_results)
 
