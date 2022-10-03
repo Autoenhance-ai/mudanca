@@ -18,19 +18,21 @@ lsd = cv2.createLineSegmentDetector(
 )
 
 lsd_results = lsd.detect(img)
-pyshift.adjust(img, lsd_results)
+matrix = pyshift.adjust(img, lsd_results)
+
+rows, cols = img.shape
+
+corrected_img_a = cv2.warpPerspective(img, matrix,(int(cols),int(rows)),flags=cv2.INTER_LINEAR)
 
 img = cv2.imread('example.jpeg') 
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-pyshift.adjust_lsd(img)
+matrix = pyshift.adjust_lsd(img)
+
+corrected_img_b = cv2.warpPerspective(img, matrix,(int(cols),int(rows)),flags=cv2.INTER_LINEAR)
 
 
-# M = cv2.getPerspectiveTransform(input_pts,output_pts)
-# out = cv2.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv2.INTER_LINEAR)
+cv2.imshow("Original", img)
+cv2.imshow("LSD A", corrected_img_a)
+cv2.imshow("LSD B", corrected_img_b)
 
-# cv2.imshow("Original", img)
-# cv2.imshow("LSD A", img_with_lines)
-# cv2.imshow("LSD B", img_with_linesB)
-# cv2.imshow("Result", out)
-
-# cv2.waitKey(0)
+cv2.waitKey(0)
