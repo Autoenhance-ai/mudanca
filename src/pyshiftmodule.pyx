@@ -19,9 +19,9 @@ MIN_LINE_LENGTH = 5         # the minimum length of a line in pixels to be regar
 
 @dataclass
 class Line:
-    p1: (float, float, float)
-    p2: (float, float, float)
-    connecting_line: (float, float, float)
+    p1: np.array
+    p2: np.array
+    connecting_line: np.array
 
     length: float
     width: float
@@ -76,17 +76,19 @@ def adjust_ported(img):
         line = Line()
 
         # store as homogeneous coordinates
-        line.p1 = (
+        line.p1 = np.array([
             detected_lines[i][0][0],
             detected_lines[i][0][1],
             1.0
-        )
+        ])
 
-        line.p2 = (
+        line.p2 = np.array([
             detected_lines[i][0][2],
             detected_lines[i][0][3],
             1.0
-        )
+        ])
+
+        line.width = widths[i]
 
         # check for lines running along image borders and skip them.
         # these would likely be false-positives which could result
@@ -102,19 +104,16 @@ def adjust_ported(img):
         #vec3lnorm(ashift_lines[lct].L, ashift_lines[lct].L);
 
         # length and width of rectangle (see LSD)
-        line.length = sqrt((px2 - px1) * (px2 - px1) + (py2 - py1) * (py2 - py1));
-        line.width = widths[i][0]
+        line.length = np.linalg.norm(line.p2 - line.p1)
 
         # ...  and weight (= length * width * angle precision)
         line.weight = line.length * line.width * precs[i][0];
 
-        angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
-        vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
-        horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
+        #angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
+        #vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
+        #horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
 
-        relevant = if line.length > MIN_LINE_LENGTH 1 else 0;
-
-        if relevant:
+        if line.length > MIN_LINE_LENGTH:
 
             # TODO: Tag as Vertical Etc.
             #
