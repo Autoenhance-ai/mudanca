@@ -2117,6 +2117,8 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
   const float lensshift_h = p->lensshift_h;
   const float shear = p->shear;
 
+  printf("Calculate Homography\n");
+
   // prepare structure of constant parameters
   dt_iop_ashift_cropfit_params_t cropfit;
   cropfit.width = g->buf_width;
@@ -2132,6 +2134,8 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
                            { 0.0f,   ht, 1.0f },
                            {   wd,   ht, 1.0f },
                            {   wd, 0.0f, 1.0f } };
+
+  printf("Conver Vertcies\n");
 
   // convert the vertices to output image coordinates
   float V[4][3];
@@ -2153,6 +2157,8 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
   }
   const float owd = xmax - xmin;
   const float oht = ymax - ymin;
+
+  printf("Calculating Lines\n");
 
   // calculate the lines defining the four edges of the image area: E = V[n] x V[n+1]
   for(int n = 0; n < 4; n++)
@@ -2331,7 +2337,7 @@ void shift_lsd(
     float *in, 
     float width, float height
 ) {
-    printf("\nShift\n");
+    printf("\nShift LSD\n");
     printf("Width: %f\n", width);
     printf("Height: %f\n", height);
 
