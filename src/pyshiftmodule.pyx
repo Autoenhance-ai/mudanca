@@ -168,7 +168,7 @@ def adjust(img, lsd_results: tuple):
     print(results)
     print(len(results))
 
-    return np.split(np.array(results), 3)
+    # return np.split(np.array(results), 3)
     
 
 def adjust_lsd(img):
@@ -186,5 +186,5 @@ def adjust_lsd(img):
     print(results)
     print(len(results))
 
-    return np.split(np.array(results), 3)
+    # return np.split(np.array(results), 3)
     
