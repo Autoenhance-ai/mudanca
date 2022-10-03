@@ -24,6 +24,10 @@ rows, cols = img.shape
 
 corrected_img_a = cv2.warpPerspective(img, matrix,(int(cols),int(rows)),flags=cv2.INTER_LINEAR)
 
+matrix = pyshift.adjust_ported(img, lsd_results)
+rows, cols = img.shape
+corrected_img_c = cv2.warpPerspective(img, matrix,(int(cols),int(rows)),flags=cv2.INTER_LINEAR)
+
 img = cv2.imread('example.jpeg') 
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 matrix = pyshift.adjust_lsd(img)
@@ -34,5 +38,6 @@ corrected_img_b = cv2.warpPerspective(img, matrix,(int(cols),int(rows)),flags=cv
 cv2.imshow("Original", img)
 cv2.imshow("LSD A", corrected_img_a)
 cv2.imshow("LSD B", corrected_img_b)
+cv2.imshow("LSD C", corrected_img_c)
 
 cv2.waitKey(0)

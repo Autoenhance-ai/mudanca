@@ -1762,15 +1762,6 @@ static dt_iop_ashift_nmsresult_t nmsfit(dt_iop_ashift_gui_data_t *g, dt_iop_ashi
   // if the image is flipped and if we do not want to fit both lens shift
   // directions or none at all, then we need to change direction
   dt_iop_ashift_fitaxis_t mdir = dir;
-  if((mdir & ASHIFT_FIT_LENS_BOTH) != ASHIFT_FIT_LENS_BOTH &&
-     (mdir & ASHIFT_FIT_LENS_BOTH) != 0)
-  {
-    // flip all directions
-    mdir ^= g->isflipped ? ASHIFT_FIT_FLIP : 0;
-    // special case that needs to be corrected
-    mdir |= (mdir & ASHIFT_FIT_LINES_BOTH) == 0 ? ASHIFT_FIT_LINES_BOTH : 0;
-  }
-
 
   // prepare fit structure and starting parameters for simplex fit.
   // note: the sequence of parameters in params[] needs to match the

@@ -4,6 +4,9 @@ import array
 import numpy as np
 from cymem.cymem cimport Pool
 
+def adjust_ported(img, lsd_results: tuple):
+    pass
+
 # TODO: 
 # - Validate Input
 # - Decide if we need the cymem dependency
