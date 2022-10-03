@@ -2180,9 +2180,7 @@ failed:
   return;
 }
 
-// TODO: Figure out the coordinate space
-//
-float* shift(
+float * shift(
     float width, float height,
     int input_line_count,
     rect rects[]
@@ -2282,15 +2280,27 @@ float* shift(
     printf("CT: %f\n", p.ct);
     printf("CB: %f\n", p.cb);
 
-    float DT_ALIGNED_ARRAY homograph[3][3];
+    float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
               100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
 
-    return homograph;
+    float flatMatrix[] = {
+      homograph[0][0],
+      homograph[0][1],
+      homograph[0][2],
+      homograph[1][0],
+      homograph[1][1],
+      homograph[1][2],
+      homograph[2][0],
+      homograph[2][1],
+      homograph[2][2],
+    };
+
+    return flatMatrix;
   };
 
 
-float* shift_lsd(
+float * shift_lsd(
     float *in, 
     float width, float height
 ) {
@@ -2389,9 +2399,21 @@ float* shift_lsd(
     printf("CT: %f\n", p.ct);
     printf("CB: %f\n", p.cb);
 
-    float DT_ALIGNED_ARRAY homograph[3][3];
+    float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
               100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
 
-    return homograph;
+    float flatMatrix[] = {
+      homograph[0][0],
+      homograph[0][1],
+      homograph[0][2],
+      homograph[1][0],
+      homograph[1][1],
+      homograph[1][2],
+      homograph[2][0],
+      homograph[2][1],
+      homograph[2][2],
+    };
+
+    return flatMatrix;
 };

@@ -9,13 +9,13 @@ typedef struct rect
   double p;            /* probability of a point with angle within 'prec' */
 } rect;
 
-extern float* shift(
+extern float * shift(
     float width, float height,
     int input_line_count,
     rect rects[]
 );
 
-extern float* shift_lsd(
+extern float * shift_lsd(
     float *in, 
     float width, float height
 );
