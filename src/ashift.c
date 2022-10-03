@@ -1600,7 +1600,6 @@ static void homography(float *homograph, const float angle, const float shift_v,
   // multiply mwork * minput -> moutput
   mat3mul((float *)moutput, (float *)mwork, (float *)minput);
 
-
   // Step 10: find x/y offsets and apply according correction so that
   // no negative coordinates occur in output vector
   float umin = FLT_MAX, vmin = FLT_MAX;
@@ -2086,14 +2085,11 @@ static double crop_fitness(double *params, void *data)
 // (and optionally the aspect angle) that delivers the largest overall crop area.
 static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
 {
-
   // if sizes are not ready (module disabled), just ignore this
   if(g->buf_width == 0 || g->buf_height == 0) return;
 
   // skip if fitting is still running
   if(g->fitting) return;
-
-  printf('Checks Completed\n');
 
   // reset fit margins if auto-cropping is off
   if(p->cropmode == ASHIFT_CROP_OFF)
@@ -2117,8 +2113,6 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
   const float lensshift_h = p->lensshift_h;
   const float shear = p->shear;
 
-  printf("Calculate Homography\n");
-
   // prepare structure of constant parameters
   dt_iop_ashift_cropfit_params_t cropfit;
   cropfit.width = g->buf_width;
@@ -2134,8 +2128,6 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
                            { 0.0f,   ht, 1.0f },
                            {   wd,   ht, 1.0f },
                            {   wd, 0.0f, 1.0f } };
-
-  printf("Conver Vertcies\n");
 
   // convert the vertices to output image coordinates
   float V[4][3];
@@ -2157,8 +2149,6 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
   }
   const float owd = xmax - xmin;
   const float oht = ymax - ymin;
-
-  printf("Calculating Lines\n");
 
   // calculate the lines defining the four edges of the image area: E = V[n] x V[n+1]
   for(int n = 0; n < 4; n++)
@@ -2185,8 +2175,6 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
     cropfit.alpha = atan2f((float)cropfit.height, (float)cropfit.width);
     pcount = 2;
   }
-
-  printf("Simplex\n");
 
   // start the simplex fit
   const int iter = simplex(crop_fitness, params, pcount, NMS_CROP_EPSILON, NMS_CROP_SCALE, NMS_CROP_ITERATIONS,
@@ -2284,6 +2272,8 @@ void shift(
     g.lines_y_off = 0.0f; // TODO: Work out what these parameters do
     g.lines = lines;
     g.lines_count = lines_count;
+    g.buf_width = width;
+    g.buf_height = height;
 
     printf("Processed Line Count: %i\n", lines_count);
     printf("Proccessed Outliers: %i\n", _remove_outliers(&g));
@@ -2330,7 +2320,20 @@ void shift(
 
     // finally apply cropping
     do_crop(&g, &p);
-}
+
+    // TODO: Return Parameters as returned from G
+    //
+
+    // p->rotation = fit.rotation;
+    // p->lensshift_v = fit.lensshift_v;
+    // p->lensshift_h = fit.lensshift_h;
+    // p->shear = fit.shear;
+
+    // g->cl = CLAMP((P[0] - d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
+    // g->cr = CLAMP((P[0] + d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
+    // g->ct = CLAMP((P[1] - d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
+    // g->cb = CLAMP((P[1] + d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
+  }
 
 
 void shift_lsd(
@@ -2368,6 +2371,8 @@ void shift_lsd(
     g.lines_y_off = 0.0f; // TODO: Work out what these parameters do
     g.lines = lines;
     g.lines_count = lines_count;
+    g.buf_width = width;
+    g.buf_height = height;
 
     printf("Processed Line Count: %i\n", lines_count);
     printf("Proccessed Outliers: %i\n", _remove_outliers(&g));
@@ -2414,4 +2419,17 @@ void shift_lsd(
 
     // finally apply cropping
     do_crop(&g, &p);
+
+    // TODO: Return Parameters as returned from G
+    //
+
+    // p->rotation = fit.rotation;
+    // p->lensshift_v = fit.lensshift_v;
+    // p->lensshift_h = fit.lensshift_h;
+    // p->shear = fit.shear;
+
+    // g->cl = CLAMP((P[0] - d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
+    // g->cr = CLAMP((P[0] + d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
+    // g->ct = CLAMP((P[1] - d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
+    // g->cb = CLAMP((P[1] + d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
 }
