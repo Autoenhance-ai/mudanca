@@ -2323,16 +2323,15 @@ void shift(
 
     // TODO: Return Parameters as returned from G
     //
+    printf("R: %f\n", p.rotation);
+    printf("LV: %f\n", p.lensshift_v);
+    printf("LH: %f\n", p.lensshift_h);
+    printf("S: %f\n", p.shear);
 
-    // p->rotation = fit.rotation;
-    // p->lensshift_v = fit.lensshift_v;
-    // p->lensshift_h = fit.lensshift_h;
-    // p->shear = fit.shear;
-
-    // g->cl = CLAMP((P[0] - d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
-    // g->cr = CLAMP((P[0] + d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
-    // g->ct = CLAMP((P[1] - d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
-    // g->cb = CLAMP((P[1] + d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
+    printf("CL: %f\n", p.cl);
+    printf("CR: %f\n", p.cr);
+    printf("CT: %f\n", p.ct);
+    printf("CB: %f\n", p.cb);
   }
 
 
@@ -2422,14 +2421,13 @@ void shift_lsd(
 
     // TODO: Return Parameters as returned from G
     //
+    printf("R: %f\n", p.rotation);
+    printf("LV: %f\n", p.lensshift_v);
+    printf("LH: %f\n", p.lensshift_h);
+    printf("S: %f\n", p.shear);
 
-    // p->rotation = fit.rotation;
-    // p->lensshift_v = fit.lensshift_v;
-    // p->lensshift_h = fit.lensshift_h;
-    // p->shear = fit.shear;
-
-    // g->cl = CLAMP((P[0] - d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
-    // g->cr = CLAMP((P[0] + d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
-    // g->ct = CLAMP((P[1] - d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
-    // g->cb = CLAMP((P[1] + d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
+    printf("CL: %f\n", p.cl);
+    printf("CR: %f\n", p.cr);
+    printf("CT: %f\n", p.ct);
+    printf("CB: %f\n", p.cb);
 }
