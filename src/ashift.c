@@ -2109,7 +2109,7 @@ float * shift(
     flatMatrix[4] = homograph[1][1];
     flatMatrix[5] = homograph[1][2];
     flatMatrix[6] = homograph[2][0];
-    flatMatrix[7] = homograph[2][2];
+    flatMatrix[7] = homograph[2][1];
     flatMatrix[8] = homograph[2][2]; 
 
     return flatMatrix;
