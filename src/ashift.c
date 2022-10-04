@@ -167,27 +167,11 @@ typedef enum dt_iop_ashift_nmsresult_t
   NMS_INSANE = 3
 } dt_iop_ashift_nmsresult_t;
 
-typedef enum dt_iop_ashift_enhance_t
-{
-  ASHIFT_ENHANCE_NONE       = 0,
-  ASHIFT_ENHANCE_EDGES      = 1 << 0,
-  ASHIFT_ENHANCE_DETAIL     = 1 << 1,
-  ASHIFT_ENHANCE_HORIZONTAL = 0x100,
-  ASHIFT_ENHANCE_VERTICAL   = 0x200
-} dt_iop_ashift_enhance_t;
-
 typedef enum dt_iop_ashift_mode_t
 {
   ASHIFT_MODE_GENERIC = 0, // $DESCRIPTION: "generic"
   ASHIFT_MODE_SPECIFIC = 1 // $DESCRIPTION: "specific"
 } dt_iop_ashift_mode_t;
-
-typedef enum dt_iop_ashift_crop_t
-{
-  ASHIFT_CROP_OFF = 0,    // $DESCRIPTION: "off"
-  ASHIFT_CROP_LARGEST = 1,// $DESCRIPTION: "largest area"
-  ASHIFT_CROP_ASPECT = 2  // $DESCRIPTION: "original format"
-} dt_iop_ashift_crop_t;
 
 typedef enum dt_iop_ashift_bounding_t
 {
@@ -207,7 +191,6 @@ typedef struct dt_iop_ashift_params_t
   float orthocorr;   // $MIN: 0.0 $MAX: 100.0 $DEFAULT: 100.0 $DESCRIPTION: "lens dependence"
   float aspect;      // $MIN: 0.5 $MAX: 2.0 $DEFAULT: 1.0 $DESCRIPTION: "aspect adjust"
   dt_iop_ashift_mode_t mode;     // $DEFAULT: ASHIFT_MODE_GENERIC $DESCRIPTION: "lens model"
-  dt_iop_ashift_crop_t cropmode; // $DEFAULT: ASHIFT_CROP_LARGEST $DESCRIPTION: "automatic cropping"
   float cl;          // $DEFAULT: 0.0
   float cr;          // $DEFAULT: 1.0
   float ct;          // $DEFAULT: 0.0
@@ -385,7 +368,6 @@ static inline void vec3lnorm(float *dst, const float *const v)
   dst[2] = v[2] * f;
 }
 
-
 // scalar product of two 3x1 vectors
 static inline float vec3scalar(const float *const v1, const float *const v2)
 {
@@ -397,165 +379,6 @@ static inline int vec3isnull(const float *const v)
 {
   const float eps = 1e-10f;
   return (fabsf(v[0]) < eps && fabsf(v[1]) < eps && fabsf(v[2]) < eps);
-}
-
-// simple conversion of rgb image into greyscale variant suitable for line segment detection
-// the lsd routines expect input as *double, roughly in the range [0.0; 256.0]
-static void rgb2grey256(const float *const in, double *const out, const int width, const int height)
-{
-  const size_t npixels = (size_t)width * height;
-
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-  dt_omp_firstprivate(npixels) \
-  dt_omp_sharedconst(in, out) \
-  schedule(static)
-#endif
-  for(int index = 0; index < npixels; index++)
-  {
-    out[index] = (0.3f * in[4*index+0] + 0.59f * in[4*index+1] + 0.11f * in[4*index+2]) * 256.0;
-  }
-}
-
-// sobel edge enhancement in one direction
-static void edge_enhance_1d(const double *in, double *out, const int width, const int height,
-                            dt_iop_ashift_enhance_t dir)
-{
-  // Sobel kernels for both directions
-  const double hkernel[3][3] = { { 1.0, 0.0, -1.0 }, { 2.0, 0.0, -2.0 }, { 1.0, 0.0, -1.0 } };
-  const double vkernel[3][3] = { { 1.0, 2.0, 1.0 }, { 0.0, 0.0, 0.0 }, { -1.0, -2.0, -1.0 } };
-  const int kwidth = 3;
-  const int khwidth = kwidth / 2;
-
-  // select kernel
-  const double *kernel = (dir == ASHIFT_ENHANCE_HORIZONTAL) ? (const double *)hkernel : (const double *)vkernel;
-
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-  dt_omp_firstprivate(height, width, khwidth, kwidth) \
-  shared(in, out, kernel) \
-  schedule(static)
-#endif
-  // loop over image pixels and perform sobel convolution
-  for(int j = khwidth; j < height - khwidth; j++)
-  {
-    const double *inp = in + (size_t)j * width + khwidth;
-    double *outp = out + (size_t)j * width + khwidth;
-    for(int i = khwidth; i < width - khwidth; i++, inp++, outp++)
-    {
-      double sum = 0.0f;
-      for(int jj = 0; jj < kwidth; jj++)
-      {
-        const int k = jj * kwidth;
-        const int l = (jj - khwidth) * width;
-        for(int ii = 0; ii < kwidth; ii++)
-        {
-          sum += inp[l + ii - khwidth] * kernel[k + ii];
-        }
-      }
-      *outp = sum;
-    }
-  }
-
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-  dt_omp_firstprivate(height, width, khwidth) \
-  shared(out) \
-  schedule(static)
-#endif
-  // border fill in output buffer, so we don't get pseudo lines at image frame
-  for(int j = 0; j < height; j++)
-    for(int i = 0; i < width; i++)
-    {
-      double val = out[j * width + i];
-
-      if(j < khwidth)
-        val = out[(khwidth - j) * width + i];
-      else if(j >= height - khwidth)
-        val = out[(j - khwidth) * width + i];
-      else if(i < khwidth)
-        val = out[j * width + (khwidth - i)];
-      else if(i >= width - khwidth)
-        val = out[j * width + (i - khwidth)];
-
-      out[j * width + i] = val;
-
-      // jump over center of image
-      if(i == khwidth && j >= khwidth && j < height - khwidth) i = width - khwidth;
-    }
-}
-
-// // detail enhancement via bilateral grid (function arguments in and out may represent identical buffers)
-// static int detail_enhance(const float *const in, float *const out, const int width, const int height)
-// {
-//   const float sigma_r = 5.0f;
-//   const float sigma_s = fminf(width, height) * 0.02f;
-//   const float detail = 10.0f;
-//   const size_t npixels = (size_t)width * height;
-//   int success = TRUE;
-
-//   // we need to convert from RGB to Lab first;
-//   // as colors don't matter we are safe to assume data to be sRGB
-
-//   // convert RGB input to Lab, use output buffer for intermediate storage
-// #ifdef _OPENMP
-// #pragma omp parallel for default(none) \
-//   dt_omp_firstprivate(npixels) \
-//   dt_omp_sharedconst(in, out) \
-//   schedule(static)
-// #endif
-//   for(size_t index = 0; index < 4*npixels; index += 4)
-//   {
-//     dt_aligned_pixel_t XYZ;
-//     sRGB_to_XYZ(in + index, XYZ);
-//     dt_XYZ_to_Lab(XYZ, out + index);
-//   }
-
-//   // bilateral grid detail enhancement
-//   dt_bilateral_t *b = dt_bilateral_init(width, height, sigma_s, sigma_r);
-
-//   if(b != NULL)
-//   {
-//     dt_bilateral_splat(b, out);
-//     dt_bilateral_blur(b);
-//     dt_bilateral_slice_to_output(b, out, out, detail);
-//     dt_bilateral_free(b);
-//   }
-//   else
-//     success = FALSE;
-
-//   // convert resulting Lab to RGB output
-// #ifdef _OPENMP
-// #pragma omp parallel for default(none) \
-//   dt_omp_firstprivate(npixels) \
-//   dt_omp_sharedconst(out) \
-//   schedule(static)
-// #endif
-//   for(size_t index = 0; index < 4*npixels; index += 4)
-//   {
-//     dt_aligned_pixel_t XYZ;
-//     dt_Lab_to_XYZ(out + index, XYZ);
-//     XYZ_to_sRGB(XYZ, out + index);
-//   }
-
-//   return success;
-// }
-
-// apply gamma correction to RGB buffer (function arguments in and out may represent identical buffers)
-static void gamma_correct(const float *const in, float *const out, const int width, const int height)
-{
-  const size_t npixels = (size_t)width * height;
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-  dt_omp_firstprivate(npixels) \
-  dt_omp_sharedconst(in, out) \
-  schedule(static)
-#endif
-  for(int index = 0; index < 4*npixels; index += 4)
-  {
-    for(int c = 0; c < 3; c++)
-      out[index+c] = powf(in[index+c], LSD_GAMMA);
-  }
 }
 
 // process detectedlines according
@@ -1737,7 +1560,6 @@ float * shift(
     p.orthocorr = 100;
     p.aspect = 1.0;
     p.mode = ASHIFT_MODE_GENERIC;
-    p.cropmode = ASHIFT_CROP_LARGEST;
     p.cl = 0.0;
     p.cr = 1.0;
     p.ct = 0.0;
