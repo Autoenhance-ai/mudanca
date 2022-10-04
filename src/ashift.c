@@ -1005,7 +1005,6 @@ static void homography(float *homograph, const float angle, const float shift_v,
   // multiply mwork * minput -> moutput
   mat3mul((float *)moutput, (float *)mwork, (float *)minput);
 
-
   // Step 9: apply aspect ratio scaling
   memset(mwork, 0, sizeof(float) * 9);
   mwork[0][0] = 1.0f * ascale;
@@ -1539,6 +1538,8 @@ float * shift(
     p.lensshift_h = 0;
     p.shear = 0;
     p.mode = ASHIFT_MODE_GENERIC;
+    p.aspect = 1.0f;
+    p.orthocorr = 0.0f;
     p.cl = 0.0;
     p.cr = 1.0;
     p.ct = 0.0;
@@ -1572,7 +1573,7 @@ float * shift(
 
     float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
-              100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
+              p.orthocorr, p.aspect, width, height, ASHIFT_HOMOGRAPH_FORWARD);
 
     printf("[[ %f,", homograph[0][0]);
     printf("%f,", homograph[0][1]);
