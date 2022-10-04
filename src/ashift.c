@@ -1566,15 +1566,12 @@ float * shift(
     p.cb = 1.0;
 
     dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY_NO_ROTATION;
-
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
-
-    printf("Result: %i\n", res);
 
     switch(res)
     {
       case NMS_NOT_ENOUGH_LINES:
-        printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
+        printf("Not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
             MINIMUM_FITLINES);
         error("Failed: Not enough lines");
         break;
@@ -1585,7 +1582,7 @@ float * shift(
         break;
       case NMS_SUCCESS:
       default:
-        printf("Success\n");
+        printf("Successfully adjusted\n");
         break;
     }
 
@@ -1597,16 +1594,6 @@ float * shift(
     float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
               100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
-
-    printf("[[ %f,", homograph[0][0]);
-    printf("%f,", homograph[0][1]);
-    printf("%f],\n", homograph[0][2]);
-    printf("[%f,", homograph[1][0]);
-    printf("%f,", homograph[1][1]);
-    printf("%f],\n", homograph[1][2]);
-    printf("[%f,", homograph[2][0]);
-    printf("%f,", homograph[2][1]);
-    printf("%f]]\n", homograph[2][2]);
 
     float *flatMatrix = malloc(sizeof(float) * 9);
 
