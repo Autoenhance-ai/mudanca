@@ -234,8 +234,6 @@ typedef struct dt_iop_ashift_cropfit_params_t
 
 typedef struct dt_iop_ashift_gui_data_t
 {
-  float near_delta;
-  int selecting_lines_version;
   float rotation_range;
   float lensshift_v_range;
   float lensshift_h_range;
@@ -1575,6 +1573,16 @@ float * shift(
     float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
               100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
+
+    printf("[[ %f,", homograph[0][0]);
+    printf("%f,", homograph[0][1]);
+    printf("%f],\n", homograph[0][2]);
+    printf("[%f,", homograph[1][0]);
+    printf("%f,", homograph[1][1]);
+    printf("%f],\n", homograph[1][2]);
+    printf("[%f,", homograph[2][0]);
+    printf("%f,", homograph[2][1]);
+    printf("%f]]\n", homograph[2][2]);
 
     float *flatMatrix = malloc(sizeof(float) * 9);
 
