@@ -33,6 +33,9 @@ def adjust(img):
         LSD_N_BINS
     )
 
+    smoothed = cv2.GaussianBlur(img, (9, 9), 10)
+    img = cv2.addWeighted(img, 1.5, smoothed, -0.5, 0)
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     lines, widths, precision, _ = lsd.detect(gray)
@@ -82,8 +85,8 @@ def adjust(img):
 
     # TODO: Adapt to Images where these aren't the widest or highest points
     #
-    max_x = src_points[1][0][0]
-    max_y = src_points[3][0][1]
+    max_x = dst_points[1][0][0]
+    max_y = dst_points[3][0][1]
 
     x1 = int(max(dst_points[0][0][1], dst_points[1][0][1]))
     x2 = int(min(dst_points[2][0][1], dst_points[3][0][1]))

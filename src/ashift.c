@@ -1434,7 +1434,7 @@ float * shift(
     p.ct = 0.0;
     p.cb = 1.0;
 
-    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
+    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY_NO_ROTATION;
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
 
     switch(res)
