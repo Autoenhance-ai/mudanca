@@ -1,10 +1,11 @@
 cimport ashift
-from cpython cimport array
-import array
-import numpy as np
-import cv2
 
-from cymem.cymem cimport Pool
+from cpython cimport array
+from libc.stdlib cimport malloc, free
+
+import array
+import cv2
+import numpy as np
 
 LSD_SCALE = 0.99                # LSD: scaling factor for line detection
 LSD_SIGMA_SCALE = 0.6           # LSD: sigma for Gaussian filter is computed as sigma = sigma_scale/scale
@@ -38,10 +39,7 @@ def adjust(img):
     line_count: int = lines.shape[0]
     height, width = gray.shape
 
-    # TODO: Find way to avoid doing this
-    #
-    cdef Pool mem = Pool()
-    cdef ashift.rect* rects = <ashift.rect*>mem.alloc(line_count, sizeof(ashift.rect))
+    cdef ashift.rect * rects = <ashift.rect*>malloc(sizeof(ashift.rect) * line_count)
 
     for line_id in range(line_count):
 
@@ -88,6 +86,8 @@ def adjust(img):
     y1 = int(max(points[0][0], points[2][0]))
     y2 = int(min(points[1][0], points[3][0]))
 
-    corrected_img = cv2.warpPerspective(img, matrix, (int(width),int(height )), flags=cv2.INTER_NEAREST)
+    corrected_img = cv2.warpPerspective(img, matrix, (int(width),int(height)), flags=cv2.INTER_NEAREST)
+    
+    free(rects)
 
     return corrected_img[x1:x2, y1:y2]
