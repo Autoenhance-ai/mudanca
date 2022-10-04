@@ -57,13 +57,18 @@ def adjust(img):
 
         rects[line_id] = rect
 
-    results: float[8] = ashift.shift(
+    results: float[9] = ashift.shift(
         width, height,
         line_count,
         rects
     )
 
-    print(results)
-    print(len(results))
+    matrix = np.array(
+        [
+            [results[0], results[1], results[2]],
+            [results[3], results[4], results[5]],
+            [results[6], results[7], results[8]]
+        ]
+    )
 
-    return np.split(np.array(results), 3)
+    return matrix

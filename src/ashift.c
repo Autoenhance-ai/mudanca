@@ -2100,17 +2100,17 @@ float * shift(
     printf("%f,", homograph[2][1]);
     printf("%f]]\n", homograph[2][2]);
 
-    float flatMatrix[] = {
-      homograph[0][0],
-      homograph[0][1],
-      homograph[0][2],
-      homograph[1][0],
-      homograph[1][1],
-      homograph[1][2],
-      homograph[2][0],
-      homograph[2][1],
-      homograph[2][2],
-    };
+    float *flatMatrix = malloc(sizeof(float) * 9);
+
+    flatMatrix[0] = homograph[0][0];
+    flatMatrix[1] = homograph[0][1];
+    flatMatrix[2] = homograph[0][2];
+    flatMatrix[3] = homograph[1][0];
+    flatMatrix[4] = homograph[1][1];
+    flatMatrix[5] = homograph[1][2];
+    flatMatrix[6] = homograph[2][0];
+    flatMatrix[7] = homograph[2][2];
+    flatMatrix[8] = homograph[2][2]; 
 
     return flatMatrix;
   };
