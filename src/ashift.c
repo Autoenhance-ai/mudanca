@@ -62,13 +62,6 @@ static void error(char * msg)
 // Thanks to Marcus for his support when implementing part of the ShiftN functionality
 // to darktable.
 
-#define LSD_SCALE 0.99                      // LSD: scaling factor for line detection
-#define LSD_SIGMA_SCALE 0.6                 // LSD: sigma for Gaussian filter is computed as sigma = sigma_scale/scale
-#define LSD_QUANT 2.0                       // LSD: bound to the quantization error on the gradient norm
-#define LSD_ANG_TH 22.5                     // LSD: gradient angle tolerance in degrees
-#define LSD_LOG_EPS 0.0                     // LSD: detection threshold: -log10(NFA) > log_eps
-#define LSD_DENSITY_TH 0.7                  // LSD: minimal density of region points in rectangle
-#define LSD_N_BINS 1024                     // LSD: number of bins in pseudo-ordering of gradient modulus
 #define LSD_GAMMA 0.45                      // gamma correction to apply on raw images prior to line detection
 #define ROTATION_RANGE 10                   // allowed min/max default range for rotation parameter
 #define ROTATION_RANGE_SOFT 180             // allowed min/max range for rotation parameter with manual adjustment
@@ -98,7 +91,7 @@ static void error(char * msg)
 #define DEFAULT_F_LENGTH 28.0               // focal length we assume if no exif data are available
 
 // define to get debugging output
-#undef ASHIFT_DEBUG
+// #undef ASHIFT_DEBUG
 
 #define SQR(a) ((a) * (a))
 
