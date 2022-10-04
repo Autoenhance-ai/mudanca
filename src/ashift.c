@@ -20,6 +20,7 @@
 */
 #include "ashift.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
@@ -31,7 +32,13 @@
 
 #define DT_ALIGNED_ARRAY __attribute__((aligned(64)))
 
-typedef enum {FALSE = 0, TRUE} boolean;
+#ifndef FALSE
+#define FALSE 0
+#endif /* !FALSE */
+
+#ifndef TRUE
+#define TRUE 1
+#endif /* !TRUE */
 
 #ifndef MIN
 #define MIN(a, b) (((a)<(b))?(a):(b))
@@ -39,6 +46,15 @@ typedef enum {FALSE = 0, TRUE} boolean;
 #ifndef MAX
 #define MAX(a, b) (((a)>(b))?(a):(b))
 #endif  /* MAX */
+
+/*----------------------------------------------------------------------------*/
+/** Fatal error, print a message to standard-error output and exit.
+ */
+static void error(char * msg)
+{
+  fprintf(stderr,"LSD Error: %s\n",msg);
+  exit(EXIT_FAILURE);
+}
 
 // Inspiration to this module comes from the program ShiftN (http://www.shiftn.de) by
 // Marcus Hebel.
@@ -2049,7 +2065,7 @@ float * shift(
     p.ct = 0.0;
     p.cb = 1.0;
 
-    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
+    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY_NO_ROTATION;
 
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
 
@@ -2060,12 +2076,12 @@ float * shift(
       case NMS_NOT_ENOUGH_LINES:
         printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
             MINIMUM_FITLINES);
-        exit(-1);
+        error("Failed: Not enough lines");
         break;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
         printf("automatic correction failed, please correct manually\n");
-        exit(-1);
+        error("Failed: No convergence or insane");
         break;
       case NMS_SUCCESS:
       default:
