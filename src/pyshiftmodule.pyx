@@ -90,4 +90,14 @@ def adjust(img):
     
     free(rects)
 
-    return corrected_img[x1:x2, y1:y2]
+    corrected_img = cv2.rectangle(
+        corrected_img,
+        (y1, x1),
+        (y2, x2),
+        (255, 255, 255),
+        2
+    )
+
+    # corrected_img[x1:x2, y1:y2]
+
+    return corrected_img
