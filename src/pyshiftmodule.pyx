@@ -71,23 +71,27 @@ def adjust(img):
         ]
     )
 
-    corners = np.array([
+    src_points = np.array([
         [[0,0]],
         [[width,0]],
         [[0,height]],
         [[width,height]]
     ]).astype(np.float32)
 
-    corners = cv2.perspectiveTransform(corners, matrix)
-    points = [corners[0][0], corners[1][0], corners[2][0], corners[3][0]]
+    dst_points = cv2.perspectiveTransform(src_points, matrix)
 
-    x1 = int(max(points[0][1], points[1][1]))
-    x2 = int(min(points[2][1], points[3][1]))
-    y1 = int(max(points[0][0], points[2][0]))
-    y2 = int(min(points[1][0], points[3][0]))
+    # TODO: Adapt to Images where these aren't the widest or highest points
+    #
+    max_x = src_points[1][0][0]
+    max_y = src_points[3][0][1]
 
-    corrected_img = cv2.warpPerspective(img, matrix, (int(width),int(height)), flags=cv2.INTER_NEAREST)
-    
+    x1 = int(max(dst_points[0][0][1], dst_points[1][0][1]))
+    x2 = int(min(dst_points[2][0][1], dst_points[3][0][1]))
+    y1 = int(max(dst_points[0][0][0], dst_points[2][0][0]))
+    y2 = int(min(dst_points[1][0][0], dst_points[3][0][0]))
+
+    corrected_img = cv2.warpPerspective(img, matrix, (int(max_x), int(max_y)), flags=cv2.INTER_NEAREST)
+
     free(rects)
 
     corrected_img = cv2.rectangle(
