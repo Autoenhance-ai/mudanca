@@ -3,7 +3,6 @@ from cpython cimport array
 import array
 import numpy as np
 import cv2
-from dataclasses import dataclass
 
 from cymem.cymem cimport Pool
 
@@ -18,7 +17,7 @@ LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the imag
 MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
 MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 
-# TODO: Add Documentation And Validation
+# TODO: Add Documentation + Validation
 #
 def adjust(img):
 
@@ -39,6 +38,8 @@ def adjust(img):
     line_count: int = lines.shape[0]
     height, width = gray.shape
 
+    # TODO: Find way to avoid doing this
+    #
     cdef Pool mem = Pool()
     cdef ashift.rect* rects = <ashift.rect*>mem.alloc(line_count, sizeof(ashift.rect))
 
