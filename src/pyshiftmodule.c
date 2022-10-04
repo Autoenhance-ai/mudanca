@@ -1700,6 +1700,7 @@ static const char __pyx_k_height[] = "height";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_matrix[] = "matrix";
 static const char __pyx_k_widths[] = "widths";
+static const char __pyx_k_cropbox[] = "cropbox";
 static const char __pyx_k_line_id[] = "line_id";
 static const char __pyx_k_pyshift[] = "pyshift";
 static const char __pyx_k_results[] = "results";
@@ -1740,6 +1741,7 @@ static PyObject *__pyx_n_s_adjust;
 static PyObject *__pyx_n_s_array;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_createLineSegmentDetector;
+static PyObject *__pyx_n_s_cropbox;
 static PyObject *__pyx_n_s_cv2;
 static PyObject *__pyx_n_s_dataclass;
 static PyObject *__pyx_n_s_dataclasses;
@@ -1829,8 +1831,9 @@ static PyObject *__pyx_pf_7pyshift_adjust(CYTHON_UNUSED PyObject *__pyx_self, Py
   PyObject *__pyx_v_x2 = NULL;
   PyObject *__pyx_v_y2 = NULL;
   struct rect __pyx_v_rect;
-  float __pyx_v_results[9];
+  float __pyx_v_results[13];
   PyObject *__pyx_v_matrix = NULL;
+  PyObject *__pyx_v_cropbox = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -2446,7 +2449,7 @@ static PyObject *__pyx_pf_7pyshift_adjust(CYTHON_UNUSED PyObject *__pyx_self, Py
  * 
  *         rects[line_id] = rect             # <<<<<<<<<<<<<<
  * 
- *     results: float[9] = ashift.shift(
+ *     results: float[13] = ashift.shift(
  */
     __pyx_t_19 = __Pyx_PyIndex_AsSsize_t(__pyx_v_line_id); if (unlikely((__pyx_t_19 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L1_error)
     (__pyx_v_rects[__pyx_t_19]) = __pyx_v_rect;
@@ -2463,7 +2466,7 @@ static PyObject *__pyx_pf_7pyshift_adjust(CYTHON_UNUSED PyObject *__pyx_self, Py
 
   /* "src/pyshiftmodule.pyx":61
  * 
- *     results: float[9] = ashift.shift(
+ *     results: float[13] = ashift.shift(
  *         width, height,             # <<<<<<<<<<<<<<
  *         line_count,
  *         rects
@@ -2472,7 +2475,7 @@ static PyObject *__pyx_pf_7pyshift_adjust(CYTHON_UNUSED PyObject *__pyx_self, Py
   __pyx_t_22 = __pyx_PyFloat_AsFloat(__pyx_v_height); if (unlikely((__pyx_t_22 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L1_error)
 
   /* "src/pyshiftmodule.pyx":62
- *     results: float[9] = ashift.shift(
+ *     results: float[13] = ashift.shift(
  *         width, height,
  *         line_count,             # <<<<<<<<<<<<<<
  *         rects
@@ -2483,11 +2486,11 @@ static PyObject *__pyx_pf_7pyshift_adjust(CYTHON_UNUSED PyObject *__pyx_self, Py
   /* "src/pyshiftmodule.pyx":60
  *         rects[line_id] = rect
  * 
- *     results: float[9] = ashift.shift(             # <<<<<<<<<<<<<<
+ *     results: float[13] = ashift.shift(             # <<<<<<<<<<<<<<
  *         width, height,
  *         line_count,
  */
-  memcpy(&(__pyx_v_results[0]), shift(__pyx_t_21, __pyx_t_22, __pyx_t_12, __pyx_v_rects), sizeof(__pyx_v_results[0]) * (9 - 0));
+  memcpy(&(__pyx_v_results[0]), shift(__pyx_t_21, __pyx_t_22, __pyx_t_12, __pyx_v_rects), sizeof(__pyx_v_results[0]) * (13 - 0));
 
   /* "src/pyshiftmodule.pyx":66
  *     )
@@ -2614,14 +2617,86 @@ static PyObject *__pyx_pf_7pyshift_adjust(CYTHON_UNUSED PyObject *__pyx_self, Py
   __pyx_v_matrix = __pyx_t_10;
   __pyx_t_10 = 0;
 
+  /* "src/pyshiftmodule.pyx":75
+ * 
+ *     cropbox = [
+ *         results[9],             # <<<<<<<<<<<<<<
+ *         results[10],
+ *         results[11],
+ */
+  __pyx_t_10 = PyFloat_FromDouble((__pyx_v_results[9])); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+
+  /* "src/pyshiftmodule.pyx":76
+ *     cropbox = [
+ *         results[9],
+ *         results[10],             # <<<<<<<<<<<<<<
+ *         results[11],
+ *         results[12]
+ */
+  __pyx_t_8 = PyFloat_FromDouble((__pyx_v_results[10])); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_8);
+
+  /* "src/pyshiftmodule.pyx":77
+ *         results[9],
+ *         results[10],
+ *         results[11],             # <<<<<<<<<<<<<<
+ *         results[12]
+ *     ]
+ */
+  __pyx_t_13 = PyFloat_FromDouble((__pyx_v_results[11])); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_13);
+
+  /* "src/pyshiftmodule.pyx":78
+ *         results[10],
+ *         results[11],
+ *         results[12]             # <<<<<<<<<<<<<<
+ *     ]
+ * 
+ */
+  __pyx_t_6 = PyFloat_FromDouble((__pyx_v_results[12])); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+
   /* "src/pyshiftmodule.pyx":74
  *     )
  * 
- *     return matrix             # <<<<<<<<<<<<<<
+ *     cropbox = [             # <<<<<<<<<<<<<<
+ *         results[9],
+ *         results[10],
+ */
+  __pyx_t_7 = PyList_New(4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __Pyx_GIVEREF(__pyx_t_10);
+  PyList_SET_ITEM(__pyx_t_7, 0, __pyx_t_10);
+  __Pyx_GIVEREF(__pyx_t_8);
+  PyList_SET_ITEM(__pyx_t_7, 1, __pyx_t_8);
+  __Pyx_GIVEREF(__pyx_t_13);
+  PyList_SET_ITEM(__pyx_t_7, 2, __pyx_t_13);
+  __Pyx_GIVEREF(__pyx_t_6);
+  PyList_SET_ITEM(__pyx_t_7, 3, __pyx_t_6);
+  __pyx_t_10 = 0;
+  __pyx_t_8 = 0;
+  __pyx_t_13 = 0;
+  __pyx_t_6 = 0;
+  __pyx_v_cropbox = ((PyObject*)__pyx_t_7);
+  __pyx_t_7 = 0;
+
+  /* "src/pyshiftmodule.pyx":81
+ *     ]
+ * 
+ *     return (matrix, cropbox)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
+  __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_v_matrix);
-  __pyx_r = __pyx_v_matrix;
+  __Pyx_GIVEREF(__pyx_v_matrix);
+  PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_v_matrix);
+  __Pyx_INCREF(__pyx_v_cropbox);
+  __Pyx_GIVEREF(__pyx_v_cropbox);
+  PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_v_cropbox);
+  __pyx_r = __pyx_t_7;
+  __pyx_t_7 = 0;
   goto __pyx_L0;
 
   /* "src/pyshiftmodule.pyx":24
@@ -2664,6 +2739,7 @@ static PyObject *__pyx_pf_7pyshift_adjust(CYTHON_UNUSED PyObject *__pyx_self, Py
   __Pyx_XDECREF(__pyx_v_x2);
   __Pyx_XDECREF(__pyx_v_y2);
   __Pyx_XDECREF(__pyx_v_matrix);
+  __Pyx_XDECREF(__pyx_v_cropbox);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -3384,6 +3460,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_createLineSegmentDetector, __pyx_k_createLineSegmentDetector, sizeof(__pyx_k_createLineSegmentDetector), 0, 0, 1, 1},
+  {&__pyx_n_s_cropbox, __pyx_k_cropbox, sizeof(__pyx_k_cropbox), 0, 0, 1, 1},
   {&__pyx_n_s_cv2, __pyx_k_cv2, sizeof(__pyx_k_cv2), 0, 0, 1, 1},
   {&__pyx_n_s_dataclass, __pyx_k_dataclass, sizeof(__pyx_k_dataclass), 0, 0, 1, 1},
   {&__pyx_n_s_dataclasses, __pyx_k_dataclasses, sizeof(__pyx_k_dataclasses), 0, 0, 1, 1},
@@ -3438,10 +3515,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *     lsd = cv2.createLineSegmentDetector(
  */
-  __pyx_tuple__2 = PyTuple_Pack(19, __pyx_n_s_img, __pyx_n_s_lsd, __pyx_n_s_lines, __pyx_n_s_widths, __pyx_n_s_precision, __pyx_n_s_, __pyx_n_s_line_count, __pyx_n_s_height, __pyx_n_s_width, __pyx_n_s_mem, __pyx_n_s_rects, __pyx_n_s_line_id, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_x2, __pyx_n_s_y2, __pyx_n_s_rect, __pyx_n_s_results, __pyx_n_s_matrix); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(20, __pyx_n_s_img, __pyx_n_s_lsd, __pyx_n_s_lines, __pyx_n_s_widths, __pyx_n_s_precision, __pyx_n_s_, __pyx_n_s_line_count, __pyx_n_s_height, __pyx_n_s_width, __pyx_n_s_mem, __pyx_n_s_rects, __pyx_n_s_line_id, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_x2, __pyx_n_s_y2, __pyx_n_s_rect, __pyx_n_s_results, __pyx_n_s_matrix, __pyx_n_s_cropbox); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(1, 0, 19, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_pyshiftmodule_pyx, __pyx_n_s_adjust, 24, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(1, 0, 20, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_pyshiftmodule_pyx, __pyx_n_s_adjust, 24, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

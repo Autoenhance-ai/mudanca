@@ -1854,9 +1854,6 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
   // if sizes are not ready (module disabled), just ignore this
   if(g->buf_width == 0 || g->buf_height == 0) return;
 
-  // skip if fitting is still running
-  if(g->fitting) return;
-
   // reset fit margins if auto-cropping is off
   if(p->cropmode == ASHIFT_CROP_OFF)
   {
@@ -1864,8 +1861,6 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
     _commit_crop_box(p, g);
     return;
   }
-
-  g->fitting = 1;
 
   double params[3];
   int pcount;
@@ -1972,6 +1967,8 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
   P[0] /= P[2];
   P[1] /= P[2];
 
+  printf("Cropped\n");
+
   // calculate clipping margins relative to output image dimensions
   g->cl = CLAMP((P[0] - d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
   g->cr = CLAMP((P[0] + d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
@@ -1980,8 +1977,6 @@ static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
 
   // final sanity check
   if(g->cr - g->cl <= 0.0f || g->cb - g->ct <= 0.0f) goto failed;
-
-  g->fitting = 0;
 
 #ifdef ASHIFT_DEBUG
   printf("margins after crop fitting: iter %d, x %f, y %f, angle %f, crop area (%f %f %f %f), width %f, height %f\n",
@@ -2097,10 +2092,10 @@ float * shift(
     printf("LH: %f\n", p.lensshift_h);
     printf("S: %f\n", p.shear);
 
-    printf("CL: %f\n", p.cl);
-    printf("CR: %f\n", p.cr);
-    printf("CT: %f\n", p.ct);
-    printf("CB: %f\n", p.cb);
+    printf("CL: %f\n", g.cl);
+    printf("CR: %f\n", g.cr);
+    printf("CT: %f\n", g.ct);
+    printf("CB: %f\n", g.cb);
 
     float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
@@ -2116,7 +2111,7 @@ float * shift(
     printf("%f,", homograph[2][1]);
     printf("%f]]\n", homograph[2][2]);
 
-    float *flatMatrix = malloc(sizeof(float) * 9);
+    float *flatMatrix = malloc(sizeof(float) * 13);
 
     flatMatrix[0] = homograph[0][0];
     flatMatrix[1] = homograph[0][1];
@@ -2127,6 +2122,11 @@ float * shift(
     flatMatrix[6] = homograph[2][0];
     flatMatrix[7] = homograph[2][1];
     flatMatrix[8] = homograph[2][2]; 
+
+    flatMatrix[9] = g.cl; 
+    flatMatrix[10] = g.cr; 
+    flatMatrix[11] = g.ct; 
+    flatMatrix[12] = g.cb; 
 
     return flatMatrix;
   };

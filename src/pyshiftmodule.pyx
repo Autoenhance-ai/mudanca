@@ -57,7 +57,7 @@ def adjust(img):
 
         rects[line_id] = rect
 
-    results: float[9] = ashift.shift(
+    results: float[13] = ashift.shift(
         width, height,
         line_count,
         rects
@@ -71,4 +71,11 @@ def adjust(img):
         ]
     )
 
-    return matrix
+    cropbox = [
+        results[9],
+        results[10],
+        results[11],
+        results[12]
+    ]
+
+    return (matrix, cropbox)
