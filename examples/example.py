@@ -9,7 +9,7 @@ img = cv2.imread('example.jpeg')
 rows, cols, ddims = img.shape
 
 
-corrected_img = cv2.warpPerspective(img, matrix, (int(cols),int(rows)))
+corrected_img = cv2.warpPerspective(img, matrix, (int(cols),int(rows)), flags=cv2.INTER_NEAREST)
 
 cv2.imwrite('fixed.jpeg', corrected_img)
 cv2.imshow("Original", img)
