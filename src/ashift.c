@@ -169,13 +169,6 @@ typedef enum dt_iop_ashift_mode_t
   ASHIFT_MODE_SPECIFIC = 1 // $DESCRIPTION: "specific"
 } dt_iop_ashift_mode_t;
 
-typedef enum dt_iop_ashift_bounding_t
-{
-  ASHIFT_BOUNDING_OFF = 0,
-  ASHIFT_BOUNDING_SELECT = 1,
-  ASHIFT_BOUNDING_DESELECT = 2
-} dt_iop_ashift_bounding_t;
-
 typedef struct dt_iop_ashift_params_t
 {
   float rotation;    // $MIN: -ROTATION_RANGE_SOFT $MAX: ROTATION_RANGE_SOFT $DEFAULT: 0.0
@@ -241,7 +234,6 @@ typedef struct dt_iop_ashift_cropfit_params_t
 
 typedef struct dt_iop_ashift_gui_data_t
 {
-  dt_iop_ashift_bounding_t isbounding;
   float near_delta;
   int selecting_lines_version;
   float rotation_range;
@@ -1548,10 +1540,6 @@ float * shift(
     p.lensshift_v = 0;
     p.lensshift_h = 0;
     p.shear = 0;
-    p.f_length = DEFAULT_F_LENGTH;
-    p.crop_factor = 1.0;
-    p.orthocorr = 100;
-    p.aspect = 1.0;
     p.mode = ASHIFT_MODE_GENERIC;
     p.cl = 0.0;
     p.cr = 1.0;
