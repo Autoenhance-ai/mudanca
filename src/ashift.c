@@ -18,7 +18,7 @@
   You should have received a copy of the GNU General Public License
   along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
-// #include "ashift.h"
+#include "ashift.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +26,8 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+
+#include "common/math.h"
 
 #define DT_ALIGNED_ARRAY __attribute__((aligned(64)))
 
@@ -96,14 +98,6 @@ typedef enum {FALSE = 0, TRUE} boolean;
 // For parameter optimization we are using the Nelder-Mead simplex method
 // implemented by Michael F. Hutt.
 #include "ashift_nmsimplex.c"
-
-// For line detection we use the LSD algorithm as published by Rafael Grompone:
-//
-//  "LSD: a Line Segment Detector" by Rafael Grompone von Gioi,
-//  Jeremie Jakubowicz, Jean-Michel Morel, and Gregory Randall,
-//  Image Processing On Line, 2012. DOI:10.5201/ipol.2012.gjmr-lsd
-//  http://dx.doi.org/10.5201/ipol.2012.gjmr-lsd
-#include "ashift_lsd.c"
 
 /*----------------------------------------------------------------------------*/
 /** Rectangle structure: line segment with width.
@@ -711,185 +705,6 @@ static void gamma_correct(const float *const in, float *const out, const int wid
       out[index+c] = powf(in[index+c], LSD_GAMMA);
   }
 }
-
-
-// do actual line_detection based on LSD algorithm and return results according
-// to this module's conventions
-static int line_detect(float *in, const int width, const int height, const int x_off, const int y_off,
-                       const float scale, dt_iop_ashift_line_t **alines, int *lcount, int *vcount, int *hcount,
-                       float *vweight, float *hweight, dt_iop_ashift_enhance_t enhance, const int is_raw)
-{
-  double *greyscale = NULL;
-  double *lsd_lines = NULL;
-  dt_iop_ashift_line_t *ashift_lines = NULL;
-
-  int vertical_count = 0;
-  int horizontal_count = 0;
-  float vertical_weight = 0.0f;
-  float horizontal_weight = 0.0f;
-
-  // apply gamma correction if image is raw
-  if(is_raw)
-  {
-    gamma_correct(in, in, width, height);
-  }
-
-  // Note: Disabled to reduce imported code
-  //
-  // if requested perform an additional detail enhancement step
-  // if(enhance & ASHIFT_ENHANCE_DETAIL)
-  // {
-  //   (void)detail_enhance(in, in, width, height);
-  // }
-
-  // allocate intermediate buffers
-  greyscale = malloc(sizeof(double) * width * height);
-  if(greyscale == NULL) goto error;
-
-  // convert to greyscale image
-  rgb2grey256(in, greyscale, width, height);
-
-  // if requested perform an additional edge enhancement step
-  if(enhance & ASHIFT_ENHANCE_EDGES)
-  {
-    (void)edge_enhance(greyscale, greyscale, width, height);
-  }
-
-  // call the line segment detector LSD;
-  // LSD stores the number of found lines in lines_count.
-  // it returns structural details as vector 'double lines[7 * lines_count]'
-  int lines_count;
-
-  lsd_lines = LineSegmentDetection(&lines_count, greyscale, width, height,
-                                   LSD_SCALE, LSD_SIGMA_SCALE, LSD_QUANT,
-                                   LSD_ANG_TH, LSD_LOG_EPS, LSD_DENSITY_TH,
-                                   LSD_N_BINS, NULL, NULL, NULL);
-
-  // we count the lines that we really want to use
-  int lct = 0;
-  if(lines_count > 0)
-  {
-    // aggregate lines data into our own structures
-    ashift_lines = (dt_iop_ashift_line_t *)malloc(sizeof(dt_iop_ashift_line_t) * lines_count);
-    if(ashift_lines == NULL) goto error;
-
-    for(int n = 0; n < lines_count; n++)
-    {
-      const float x1 = lsd_lines[n * 7 + 0];
-      const float y1 = lsd_lines[n * 7 + 1];
-      const float x2 = lsd_lines[n * 7 + 2];
-      const float y2 = lsd_lines[n * 7 + 3];
-
-      // check for lines running along image borders and skip them.
-      // these would likely be false-positives which could result
-      // from any kind of processing artifacts
-      if((fabsf(x1 - x2) < 1 && fmaxf(x1, x2) < 2)
-         || (fabsf(x1 - x2) < 1 && fminf(x1, x2) > width - 3)
-         || (fabsf(y1 - y2) < 1 && fmaxf(y1, y2) < 2)
-         || (fabsf(y1 - y2) < 1 && fminf(y1, y2) > height - 3))
-        continue;
-
-      // line position in absolute coordinates
-      float px1 = x_off + x1;
-      float py1 = y_off + y1;
-      float px2 = x_off + x2;
-      float py2 = y_off + y2;
-
-      // scale back to input buffer
-      px1 /= scale;
-      py1 /= scale;
-      px2 /= scale;
-      py2 /= scale;
-
-      // store as homogeneous coordinates
-      ashift_lines[lct].p1[0] = px1;
-      ashift_lines[lct].p1[1] = py1;
-      ashift_lines[lct].p1[2] = 1.0f;
-      ashift_lines[lct].p2[0] = px2;
-      ashift_lines[lct].p2[1] = py2;
-      ashift_lines[lct].p2[2] = 1.0f;
-
-      // calculate homogeneous coordinates of connecting line (defined by the two points)
-      vec3prodn(ashift_lines[lct].L, ashift_lines[lct].p1, ashift_lines[lct].p2);
-
-      // normalaze line coordinates so that x^2 + y^2 = 1
-      // (this will always succeed as L is a real line connecting two real points)
-      vec3lnorm(ashift_lines[lct].L, ashift_lines[lct].L);
-
-      // length and width of rectangle (see LSD)
-      ashift_lines[lct].length = sqrt((px2 - px1) * (px2 - px1) + (py2 - py1) * (py2 - py1));
-      ashift_lines[lct].width = lsd_lines[n * 7 + 4] / scale;
-
-      // ...  and weight (= length * width * angle precision)
-      const float weight = ashift_lines[lct].length * ashift_lines[lct].width * lsd_lines[n * 7 + 5];
-      ashift_lines[lct].weight = weight;
-
-
-      const float angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
-      const int vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
-      const int horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
-
-      const int relevant = ashift_lines[lct].length > MIN_LINE_LENGTH ? 1 : 0;
-
-      // register type of line
-      dt_iop_ashift_linetype_t type = ASHIFT_LINE_IRRELEVANT;
-      if(vertical && relevant)
-      {
-        type = ASHIFT_LINE_VERTICAL_SELECTED;
-        vertical_count++;
-        vertical_weight += weight;
-      }
-      else if(horizontal && relevant)
-      {
-        type = ASHIFT_LINE_HORIZONTAL_SELECTED;
-        horizontal_count++;
-        horizontal_weight += weight;
-      }
-      ashift_lines[lct].type = type;
-
-      // the next valid line
-      lct++;
-    }
-  }
-#ifdef ASHIFT_DEBUG
-    printf("%d lines (vertical %d, horizontal %d, not relevant %d)\n", lines_count, vertical_count,
-           horizontal_count, lct - vertical_count - horizontal_count);
-    float xmin = FLT_MAX, xmax = FLT_MIN, ymin = FLT_MAX, ymax = FLT_MIN;
-    for(int n = 0; n < lct; n++)
-    {
-      xmin = fmin(xmin, fmin(ashift_lines[n].p1[0], ashift_lines[n].p2[0]));
-      xmax = fmax(xmax, fmax(ashift_lines[n].p1[0], ashift_lines[n].p2[0]));
-      ymin = fmin(ymin, fmin(ashift_lines[n].p1[1], ashift_lines[n].p2[1]));
-      ymax = fmax(ymax, fmax(ashift_lines[n].p1[1], ashift_lines[n].p2[1]));
-      printf("x1 %.0f, y1 %.0f, x2 %.0f, y2 %.0f, length %.0f, width %f, X %f, Y %f, Z %f, type %d, scalars %f %f\n",
-             ashift_lines[n].p1[0], ashift_lines[n].p1[1], ashift_lines[n].p2[0], ashift_lines[n].p2[1],
-             ashift_lines[n].length, ashift_lines[n].width,
-             ashift_lines[n].L[0], ashift_lines[n].L[1], ashift_lines[n].L[2], ashift_lines[n].type,
-             vec3scalar(ashift_lines[n].p1, ashift_lines[n].L),
-             vec3scalar(ashift_lines[n].p2, ashift_lines[n].L));
-    }
-    printf("xmin %.0f, xmax %.0f, ymin %.0f, ymax %.0f\n", xmin, xmax, ymin, ymax);
-#endif
-
-  // store results in provided locations
-  *lcount = lct;
-  *vcount = vertical_count;
-  *vweight = vertical_weight;
-  *hcount = horizontal_count;
-  *hweight = horizontal_weight;
-  *alines = ashift_lines;
-
-  // free intermediate buffers
-  free(lsd_lines);
-  free(greyscale);
-  return lct > 0 ? TRUE : FALSE;
-
-error:
-  free(lsd_lines);
-  free(greyscale);
-  return FALSE;
-}
-
 
 // process detectedlines according
 // to this module's conventions
@@ -1703,8 +1518,6 @@ static double model_fitness(double *params, void *data)
     // get scalar product of line L with orthogonal axis A -> gives 0 if line is perpendicular
     float s = vec3scalar(L, A);
 
-    printf("Scalar: %f\n", s);
-
     // sum up weighted s^2 for both directions individually
     sumsq_v += isvertical ? s * s * lines[n].weight : 0.0;
     weight_v  += isvertical ? lines[n].weight : 0.0;
@@ -2247,12 +2060,12 @@ float * shift(
       case NMS_NOT_ENOUGH_LINES:
         printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
             MINIMUM_FITLINES);
-        error("Failed");
+        exit(-1);
         break;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
         printf("automatic correction failed, please correct manually\n");
-        error("Failed");
+        exit(-1);
         break;
       case NMS_SUCCESS:
       default:
@@ -2276,6 +2089,16 @@ float * shift(
     float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
               100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
+
+    printf("[[ %f,", homograph[0][0]);
+    printf("%f,", homograph[0][1]);
+    printf("%f],\n", homograph[0][2]);
+    printf("[%f,", homograph[1][0]);
+    printf("%f,", homograph[1][1]);
+    printf("%f],\n", homograph[1][2]);
+    printf("[%f,", homograph[2][0]);
+    printf("%f,", homograph[2][1]);
+    printf("%f]]\n", homograph[2][2]);
 
     float flatMatrix[] = {
       homograph[0][0],
@@ -2291,122 +2114,3 @@ float * shift(
 
     return flatMatrix;
   };
-
-
-float * shift_lsd(
-    float *in, 
-    float width, float height
-) {
-    printf("\nShift LSD\n");
-    printf("Width: %f\n", width);
-    printf("Height: %f\n", height);
-
-    dt_iop_ashift_line_t *lines;
-    int lines_count;
-    int vertical_count;
-    int horizontal_count;
-    float vertical_weight;
-    float horizontal_weight;
-
-    dt_iop_ashift_enhance_t enhance = ASHIFT_ENHANCE_NONE;
-
-   printf("Line Detect: %i\n", line_detect(
-        in, 
-        width, height,
-        0.0f, 0.0f, // TODO: Work out what these parameters do
-        1.0f, // TODO: Work out what these parameters do
-        &lines, &lines_count,
-        &vertical_count, &horizontal_count, &vertical_weight, &horizontal_weight,
-        enhance, FALSE
-    ));
-
-    dt_iop_ashift_gui_data_t g;
-
-    g.rotation_range = ROTATION_RANGE_SOFT;
-    g.lensshift_v_range = LENSSHIFT_RANGE_SOFT;
-    g.lensshift_h_range = LENSSHIFT_RANGE_SOFT;
-    g.shear_range = SHEAR_RANGE_SOFT;
-    g.lines_in_width = width;
-    g.lines_in_height = height;
-    g.lines_x_off = 0.0f; // TODO: Work out what these parameters do
-    g.lines_y_off = 0.0f; // TODO: Work out what these parameters do
-    g.lines = lines;
-    g.lines_count = lines_count;
-    g.buf_width = width;
-    g.buf_height = height;
-
-    printf("Processed Line Count: %i\n", lines_count);
-    printf("Proccessed Outliers: %i\n", _remove_outliers(&g));
-    printf("Outlier Line Count: %i\n", lines_count);
-
-    dt_iop_ashift_params_t p;
-
-    p.rotation = 0;
-    p.lensshift_v = 0;
-    p.lensshift_h = 0;
-    p.shear = 0;
-    p.f_length = DEFAULT_F_LENGTH;
-    p.crop_factor = 1.0;
-    p.orthocorr = 100;
-    p.aspect = 1.0;
-    p.mode = ASHIFT_MODE_GENERIC;
-    p.cropmode = ASHIFT_CROP_LARGEST;
-    p.cl = 0.0;
-    p.cr = 1.0;
-    p.ct = 0.0;
-    p.cb = 1.0;
-
-    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
-    dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
-
-    printf("Result: %i\n", res);
-
-    switch(res)
-    {
-      case NMS_NOT_ENOUGH_LINES:
-        printf("not enough structure for automatic correction\nminimum %d lines in each relevant direction",
-            MINIMUM_FITLINES);
-        error("Failed");
-        break;
-      case NMS_DID_NOT_CONVERGE:
-      case NMS_INSANE:
-        printf("automatic correction failed, please correct manually");
-        error("Failed");
-        break;
-      case NMS_SUCCESS:
-      default:
-        printf("Success\n");
-        break;
-    }
-
-    // finally apply cropping
-    do_crop(&g, &p);
-
-    printf("R: %f\n", p.rotation);
-    printf("LV: %f\n", p.lensshift_v);
-    printf("LH: %f\n", p.lensshift_h);
-    printf("S: %f\n", p.shear);
-
-    printf("CL: %f\n", p.cl);
-    printf("CR: %f\n", p.cr);
-    printf("CT: %f\n", p.ct);
-    printf("CB: %f\n", p.cb);
-
-    float homograph[3][3];
-    homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
-              100, 1.0, width, height, ASHIFT_HOMOGRAPH_FORWARD);
-
-    float flatMatrix[] = {
-      homograph[0][0],
-      homograph[0][1],
-      homograph[0][2],
-      homograph[1][0],
-      homograph[1][1],
-      homograph[1][2],
-      homograph[2][0],
-      homograph[2][1],
-      homograph[2][2],
-    };
-
-    return flatMatrix;
-};

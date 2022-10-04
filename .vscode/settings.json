@@ -24,6 +24,8 @@
         "cassert": "c",
         "__locale": "c",
         "ios": "c",
-        "variant": "c"
+        "variant": "c",
+        "stdio.h": "c",
+        "math.h": "c"
     }
 }

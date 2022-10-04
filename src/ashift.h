@@ -14,8 +14,3 @@ extern float * shift(
     int input_line_count,
     rect rects[]
 );
-
-extern float * shift_lsd(
-    float *in, 
-    float width, float height
-);
