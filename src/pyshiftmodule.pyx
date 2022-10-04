@@ -18,8 +18,7 @@ LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the imag
 MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
 MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 
-# TODO: 
-# - Validate Image
+# TODO: Add Documentation And Validation
 #
 def adjust(img):
 
@@ -34,9 +33,11 @@ def adjust(img):
         LSD_N_BINS
     )
 
-    lines, widths, precision, _ = lsd.detect(img)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    lines, widths, precision, _ = lsd.detect(gray)
     line_count: int = lines.shape[0]
-    height, width = img.shape
+    height, width = gray.shape
 
     cdef Pool mem = Pool()
     cdef ashift.rect* rects = <ashift.rect*>mem.alloc(line_count, sizeof(ashift.rect))
@@ -57,7 +58,7 @@ def adjust(img):
 
         rects[line_id] = rect
 
-    results: float[13] = ashift.shift(
+    results: float[9] = ashift.shift(
         width, height,
         line_count,
         rects
@@ -71,11 +72,21 @@ def adjust(img):
         ]
     )
 
-    cropbox = [
-        results[9],
-        results[10],
-        results[11],
-        results[12]
-    ]
+    corners = np.array([
+        [[0,0]],
+        [[width,0]],
+        [[0,height]],
+        [[width,height]]
+    ]).astype(np.float32)
 
-    return (matrix, cropbox)
+    corners = cv2.perspectiveTransform(corners, matrix)
+    points = [corners[0][0], corners[1][0], corners[2][0], corners[3][0]]
+
+    x1 = int(max(points[0][1], points[1][1]))
+    x2 = int(min(points[2][1], points[3][1]))
+    y1 = int(max(points[0][0], points[2][0]))
+    y2 = int(min(points[1][0], points[3][0]))
+
+    corrected_img = cv2.warpPerspective(img, matrix, (int(width),int(height )), flags=cv2.INTER_NEAREST)
+
+    return corrected_img[x1:x2, y1:y2]

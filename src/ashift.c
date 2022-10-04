@@ -112,15 +112,6 @@ static void error(char * msg)
 /** Rectangle structure: line segment with width.
  */
 
-
-typedef enum dt_iop_ashift_method_t
-{
-  ASHIFT_METHOD_NONE = 0,
-  ASHIFT_METHOD_AUTO,
-  ASHIFT_METHOD_QUAD,
-  ASHIFT_METHOD_LINES
-} dt_iop_ashift_method_t;
-
 typedef enum dt_iop_ashift_homodir_t
 {
   ASHIFT_HOMOGRAPH_FORWARD,
@@ -140,15 +131,6 @@ typedef enum dt_iop_ashift_linetype_t
   ASHIFT_LINE_HORIZONTAL_SELECTED = ASHIFT_LINE_RELEVANT | ASHIFT_LINE_SELECTED,
   ASHIFT_LINE_MASK = ASHIFT_LINE_RELEVANT | ASHIFT_LINE_DIRVERT | ASHIFT_LINE_SELECTED
 } dt_iop_ashift_linetype_t;
-
-typedef enum dt_iop_ashift_linecolor_t
-{
-  ASHIFT_LINECOLOR_GREY    = 0,
-  ASHIFT_LINECOLOR_GREEN   = 1,
-  ASHIFT_LINECOLOR_RED     = 2,
-  ASHIFT_LINECOLOR_BLUE    = 3,
-  ASHIFT_LINECOLOR_YELLOW  = 4
-} dt_iop_ashift_linecolor_t;
 
 typedef enum dt_iop_ashift_fitaxis_t
 {
@@ -214,16 +196,6 @@ typedef enum dt_iop_ashift_bounding_t
   ASHIFT_BOUNDING_DESELECT = 2
 } dt_iop_ashift_bounding_t;
 
-typedef enum dt_iop_ashift_jobcode_t
-{
-  ASHIFT_JOBCODE_NONE = 0,
-  ASHIFT_JOBCODE_GET_STRUCTURE = 1,
-  ASHIFT_JOBCODE_FIT = 2,
-  ASHIFT_JOBCODE_GET_STRUCTURE_LINES = 3,
-  ASHIFT_JOBCODE_GET_STRUCTURE_QUAD = 4,
-  ASHIFT_JOBCODE_DO_CROP = 5
-} dt_iop_ashift_jobcode_t;
-
 typedef struct dt_iop_ashift_params_t
 {
   float rotation;    // $MIN: -ROTATION_RANGE_SOFT $MAX: ROTATION_RANGE_SOFT $DEFAULT: 0.0
@@ -256,18 +228,6 @@ typedef struct dt_iop_ashift_line_t
   // homogeneous coordinates:
   float L[3];
 } dt_iop_ashift_line_t;
-
-typedef struct dt_iop_ashift_points_idx_t
-{
-  size_t offset;
-  int length;
-  int near;
-  int bounded;
-  dt_iop_ashift_linetype_t type;
-  dt_iop_ashift_linecolor_t color;
-  // bounding box:
-  float bbx, bby, bbX, bbY;
-} dt_iop_ashift_points_idx_t;
 
 typedef struct dt_iop_ashift_fit_params_t
 {
@@ -323,20 +283,11 @@ typedef struct dt_iop_ashift_gui_data_t
   int lines_version;
   float vertical_weight;
   float horizontal_weight;
-  float *buf;
   int buf_width;
   int buf_height;
   int buf_x_off;
   int buf_y_off;
   float buf_scale;
-  uint64_t lines_hash;
-  uint64_t grid_hash;
-  uint64_t buf_hash;
-  float lastx;
-  float lasty;
-  float crop_cx;
-  float crop_cy;
-  dt_iop_ashift_jobcode_t jobcode;
   int jobparams;
   int adjust_crop;
   float cl;	// shadow copy of dt_iop_ashift_data_t.cl
@@ -533,64 +484,6 @@ static void edge_enhance_1d(const double *in, double *out, const int width, cons
       if(i == khwidth && j >= khwidth && j < height - khwidth) i = width - khwidth;
     }
 }
-
-// edge enhancement in both directions
-static int edge_enhance(const double *in, double *out, const int width, const int height)
-{
-  double *Gx = NULL;
-  double *Gy = NULL;
-
-  Gx = malloc(sizeof(double) * width * height);
-  if(Gx == NULL) goto error;
-
-  Gy = malloc(sizeof(double) * width * height);
-  if(Gy == NULL) goto error;
-
-  // perform edge enhancement in both directions
-  edge_enhance_1d(in, Gx, width, height, ASHIFT_ENHANCE_HORIZONTAL);
-  edge_enhance_1d(in, Gy, width, height, ASHIFT_ENHANCE_VERTICAL);
-
-// calculate absolute values
-#ifdef _OPENMP
-#pragma omp parallel for default(none) \
-  dt_omp_firstprivate(height, width) \
-  shared(Gx, Gy, out) \
-  schedule(static)
-#endif
-  for(size_t k = 0; k < (size_t)width * height; k++)
-  {
-    out[k] = sqrt(Gx[k] * Gx[k] + Gy[k] * Gy[k]);
-  }
-
-  free(Gx);
-  free(Gy);
-  return TRUE;
-
-error:
-  if(Gx) free(Gx);
-  if(Gy) free(Gy);
-  return FALSE;
-}
-
-// NOTE: Commented Out so we don't have to pull in more and more of Darr Table
-// TODO: Remove
-//
-
-// // XYZ -> sRGB matrix
-// static void XYZ_to_sRGB(const dt_aligned_pixel_t XYZ, dt_aligned_pixel_t sRGB)
-// {
-//   sRGB[0] =  3.1338561f * XYZ[0] - 1.6168667f * XYZ[1] - 0.4906146f * XYZ[2];
-//   sRGB[1] = -0.9787684f * XYZ[0] + 1.9161415f * XYZ[1] + 0.0334540f * XYZ[2];
-//   sRGB[2] =  0.0719453f * XYZ[0] - 0.2289914f * XYZ[1] + 1.4052427f * XYZ[2];
-// }
-
-// // sRGB -> XYZ matrix
-// static void sRGB_to_XYZ(const dt_aligned_pixel_t sRGB, dt_aligned_pixel_t XYZ)
-// {
-//   XYZ[0] = 0.4360747f * sRGB[0] + 0.3850649f * sRGB[1] + 0.1430804f * sRGB[2];
-//   XYZ[1] = 0.2225045f * sRGB[0] + 0.7168786f * sRGB[1] + 0.0606169f * sRGB[2];
-//   XYZ[2] = 0.0139322f * sRGB[0] + 0.0971045f * sRGB[1] + 0.7141733f * sRGB[2];
-// }
 
 // // detail enhancement via bilateral grid (function arguments in and out may represent identical buffers)
 // static int detail_enhance(const float *const in, float *const out, const int width, const int height)
@@ -1787,158 +1680,6 @@ static double crop_fitness(double *params, void *data)
   return -A;
 }
 
-
-// strategy: for a given center of the crop area and a specific aspect angle
-// we calculate the largest crop area that still lies within the output image;
-// now we allow a Nelder-Mead simplex to search for the center coordinates
-// (and optionally the aspect angle) that delivers the largest overall crop area.
-static void do_crop(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p)
-{
-  // if sizes are not ready (module disabled), just ignore this
-  if(g->buf_width == 0 || g->buf_height == 0) return;
-
-  // reset fit margins if auto-cropping is off
-  if(p->cropmode == ASHIFT_CROP_OFF)
-  {
-    _clear_shadow_crop_box(g);
-    _commit_crop_box(p, g);
-    return;
-  }
-
-  double params[3];
-  int pcount;
-
-  // get parameters for the homograph
-  const float f_length_kb = (p->mode == ASHIFT_MODE_GENERIC) ? DEFAULT_F_LENGTH : p->f_length * p->crop_factor;
-  const float orthocorr = (p->mode == ASHIFT_MODE_GENERIC) ? 0.0f : p->orthocorr;
-  const float aspect = (p->mode == ASHIFT_MODE_GENERIC) ? 1.0f : p->aspect;
-  const float rotation = p->rotation;
-  const float lensshift_v = p->lensshift_v;
-  const float lensshift_h = p->lensshift_h;
-  const float shear = p->shear;
-
-  // prepare structure of constant parameters
-  dt_iop_ashift_cropfit_params_t cropfit;
-  cropfit.width = g->buf_width;
-  cropfit.height = g->buf_height;
-  homography((float *)cropfit.homograph, rotation, lensshift_v, lensshift_h, shear, f_length_kb,
-             orthocorr, aspect, cropfit.width, cropfit.height, ASHIFT_HOMOGRAPH_FORWARD);
-
-  const float wd = cropfit.width;
-  const float ht = cropfit.height;
-
-  // the four vertices of the image in input image coordinates
-  const float Vc[4][3] = { { 0.0f, 0.0f, 1.0f },
-                           { 0.0f,   ht, 1.0f },
-                           {   wd,   ht, 1.0f },
-                           {   wd, 0.0f, 1.0f } };
-
-  // convert the vertices to output image coordinates
-  float V[4][3];
-  for(int n = 0; n < 4; n++)
-    mat3mulv(V[n], (float *)cropfit.homograph, Vc[n]);
-
-  // get width and height of output image for later use
-  float xmin = FLT_MAX, ymin = FLT_MAX, xmax = FLT_MIN, ymax = FLT_MIN;
-  for(int n = 0; n < 4; n++)
-  {
-    // normalize V
-    V[n][0] /= V[n][2];
-    V[n][1] /= V[n][2];
-    V[n][2] = 1.0f;
-    xmin = MIN(xmin, V[n][0]);
-    xmax = MAX(xmax, V[n][0]);
-    ymin = MIN(ymin, V[n][1]);
-    ymax = MAX(ymax, V[n][1]);
-  }
-  const float owd = xmax - xmin;
-  const float oht = ymax - ymin;
-
-  // calculate the lines defining the four edges of the image area: E = V[n] x V[n+1]
-  for(int n = 0; n < 4; n++)
-    vec3prodn(cropfit.edges[n], V[n], V[(n + 1) % 4]);
-
-  // initial fit parameters: crop area is centered and aspect angle is that of the original image
-  // number of parameters: fit only crop center coordinates with a fixed aspect ratio, or fit all three variables
-  if(p->cropmode == ASHIFT_CROP_LARGEST)
-  {
-    params[0] = 0.5;
-    params[1] = 0.5;
-    params[2] = atan2f((float)cropfit.height, (float)cropfit.width);
-    cropfit.x = NAN;
-    cropfit.y = NAN;
-    cropfit.alpha = NAN;
-    pcount = 3;
-  }
-  else //(p->cropmode == ASHIFT_CROP_ASPECT)
-  {
-    params[0] = 0.5;
-    params[1] = 0.5;
-    cropfit.x = NAN;
-    cropfit.y = NAN;
-    cropfit.alpha = atan2f((float)cropfit.height, (float)cropfit.width);
-    pcount = 2;
-  }
-
-  // start the simplex fit
-  const int iter = simplex(crop_fitness, params, pcount, NMS_CROP_EPSILON, NMS_CROP_SCALE, NMS_CROP_ITERATIONS,
-                           crop_constraint, (void*)&cropfit);
-  // in case the fit did not converge -> failed
-  if(iter >= NMS_CROP_ITERATIONS) goto failed;
-
-  // the fit did converge -> get clipping margins out of params:
-  cropfit.x = isnan(cropfit.x) ? params[0] : cropfit.x;
-  cropfit.y = isnan(cropfit.y) ? params[1] : cropfit.y;
-  cropfit.alpha = isnan(cropfit.alpha) ? params[2] : cropfit.alpha;
-
-  // the area of the best fitting rectangle
-  const float A = fabs(crop_fitness(params, (void*)&cropfit));
-
-  // unlikely to happen but we need to catch this case
-  if(A == 0.0f) goto failed;
-
-  // we need the half diagonal of that rectangle (this is in output image dimensions);
-  // no need to check for division by zero here as this case implies A == 0.0f, caught above
-  const float d = sqrtf(A / (2.0f * sinf(2.0f * cropfit.alpha)));
-
-  // the rectangle's center in input image (homogeneous) coordinates
-  const float Pc[3] = { cropfit.x * wd, cropfit.y * ht, 1.0f };
-
-  // convert rectangle center to output image coordinates and normalize
-  float P[3];
-  mat3mulv(P, (float *)cropfit.homograph, Pc);
-  P[0] /= P[2];
-  P[1] /= P[2];
-
-  printf("Cropped\n");
-
-  // calculate clipping margins relative to output image dimensions
-  g->cl = CLAMP((P[0] - d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
-  g->cr = CLAMP((P[0] + d * cosf(cropfit.alpha)) / owd, 0.0f, 1.0f);
-  g->ct = CLAMP((P[1] - d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
-  g->cb = CLAMP((P[1] + d * sinf(cropfit.alpha)) / oht, 0.0f, 1.0f);
-
-  // final sanity check
-  if(g->cr - g->cl <= 0.0f || g->cb - g->ct <= 0.0f) goto failed;
-
-#ifdef ASHIFT_DEBUG
-  printf("margins after crop fitting: iter %d, x %f, y %f, angle %f, crop area (%f %f %f %f), width %f, height %f\n",
-         iter, cropfit.x, cropfit.y, cropfit.alpha, g->cl, g->cr, g->ct, g->cb, wd, ht);
-#endif
-  // dt_control_queue_redraw_center();
-  return;
-
-failed:
-  // in case of failure: reset clipping margins, set "automatic cropping" parameter
-  // to "off" state, and display warning message
-  _clear_shadow_crop_box(g);
-  _commit_crop_box(p, g);
-  p->cropmode = ASHIFT_CROP_OFF;
-  // dt_bauhaus_combobox_set(g->cropmode, p->cropmode);
-  printf("automatic cropping failed");
-  return;
-}
-
 float * shift(
     float width, float height,
     int input_line_count,
@@ -2026,18 +1767,10 @@ float * shift(
         break;
     }
 
-    // finally apply cropping
-    do_crop(&g, &p);
-
     printf("R: %f\n", p.rotation);
     printf("LV: %f\n", p.lensshift_v);
     printf("LH: %f\n", p.lensshift_h);
     printf("S: %f\n", p.shear);
-
-    printf("CL: %f\n", g.cl);
-    printf("CR: %f\n", g.cr);
-    printf("CT: %f\n", g.ct);
-    printf("CB: %f\n", g.cb);
 
     float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
@@ -2053,7 +1786,7 @@ float * shift(
     printf("%f,", homograph[2][1]);
     printf("%f]]\n", homograph[2][2]);
 
-    float *flatMatrix = malloc(sizeof(float) * 13);
+    float *flatMatrix = malloc(sizeof(float) * 9);
 
     flatMatrix[0] = homograph[0][0];
     flatMatrix[1] = homograph[0][1];
@@ -2064,11 +1797,6 @@ float * shift(
     flatMatrix[6] = homograph[2][0];
     flatMatrix[7] = homograph[2][1];
     flatMatrix[8] = homograph[2][2]; 
-
-    flatMatrix[9] = g.cl; 
-    flatMatrix[10] = g.cr; 
-    flatMatrix[11] = g.ct; 
-    flatMatrix[12] = g.cb; 
 
     return flatMatrix;
   };
