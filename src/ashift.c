@@ -100,10 +100,6 @@ static void error(char * msg)
         (x > max ? max : (x < min ? min : x)); \
     })
 
-// maximum number of drawn lines that can be saved in parameters
-// any change in this value needs to upgrade parameters version !
-#define MAX_SAVED_LINES 50
-
 // For parameter optimization we are using the Nelder-Mead simplex method
 // implemented by Michael F. Hutt.
 #include "ashift_nmsimplex.c"
@@ -195,9 +191,6 @@ typedef struct dt_iop_ashift_params_t
   float cr;          // $DEFAULT: 1.0
   float ct;          // $DEFAULT: 0.0
   float cb;          // $DEFAULT: 1.0
-  float last_drawn_lines[MAX_SAVED_LINES * 4];
-  int last_drawn_lines_count;
-  float last_quad_lines[8];
 } dt_iop_ashift_params_t;
 
 typedef struct dt_iop_ashift_line_t
