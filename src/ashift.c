@@ -28,7 +28,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "common/math.h"
+#include "math.h"
 
 #define DT_ALIGNED_ARRAY __attribute__((aligned(64)))
 
