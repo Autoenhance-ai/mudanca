@@ -303,44 +303,8 @@ typedef struct dt_iop_ashift_cropfit_params_t
   float edges[4][3];
 } dt_iop_ashift_cropfit_params_t;
 
-
-// Dummy Structure
-//
-typedef struct _gui_collapsible_section_t
-{
-  void *parent;       // the parent widget
-  char *confname;      // configuration name for the toggle status
-  void *toggle;    // toggle button
-  void *expander;  // the expanded
-  void *container;    // the container for all widgets into the section
-} dt_gui_collapsible_section_t;
-
 typedef struct dt_iop_ashift_gui_data_t
 {
-  void *rotation; // voided to keep structure GtkWidget
-  void *lensshift_v;  // voided to keep structure GtkWidget
-  void *lensshift_h;  // voided to keep structure GtkWidget
-  void *shear;  // voided to keep structure GtkWidget
-  void *cropmode;  // voided to keep structure GtkWidget
-  void *mode;  // voided to keep structure GtkWidget
-  void *specifics;  // voided to keep structure GtkWidget
-  void *f_length;  // voided to keep structure GtkWidget
-  void *crop_factor;  // voided to keep structure GtkWidget
-  void *orthocorr;  // voided to keep structure GtkWidget
-  void *aspect;  // voided to keep structure GtkWidget
-  void *fit_v;  // voided to keep structure GtkWidget
-  void *fit_h;  // voided to keep structure GtkWidget
-  void *fit_both;  // voided to keep structure GtkWidget
-  void *structure_auto;  // voided to keep structure GtkWidget
-  void *structure_quad;  // voided to keep structure GtkWidget
-  void *structure_lines;  // voided to keep structure GtkWidget
-  int straightening;
-  float straighten_x;
-  float straighten_y;
-  int fitting;
-  int isflipped;
-  int isselecting;
-  int isdeselecting;
   dt_iop_ashift_bounding_t isbounding;
   float near_delta;
   int selecting_lines_version;
@@ -359,10 +323,6 @@ typedef struct dt_iop_ashift_gui_data_t
   int lines_version;
   float vertical_weight;
   float horizontal_weight;
-  float *points;
-  dt_iop_ashift_points_idx_t *points_idx;
-  int points_lines_count;
-  int points_version;
   float *buf;
   int buf_width;
   int buf_height;
@@ -372,7 +332,6 @@ typedef struct dt_iop_ashift_gui_data_t
   uint64_t lines_hash;
   uint64_t grid_hash;
   uint64_t buf_hash;
-  dt_iop_ashift_fitaxis_t lastfit;
   float lastx;
   float lasty;
   float crop_cx;
@@ -384,15 +343,6 @@ typedef struct dt_iop_ashift_gui_data_t
   float cr;	// shadow copy of dt_iop_ashift_data_t.cr
   float ct;	// shadow copy of dt_iop_ashift_data_t.ct
   float cb;	// shadow copy of dt_iop_ashift_data_t.cb
-
-  dt_iop_ashift_method_t current_structure_method;
-  int draw_near_point;
-  int draw_point_move;
-  int draw_line_move;
-  float draw_pointmove_x;
-  float draw_pointmove_y;
-  float *draw_points;
-  dt_gui_collapsible_section_t cs;
 } dt_iop_ashift_gui_data_t;
 
 #define generate_mat3inv_body(c_type, A, B)                                                                  \
@@ -1985,7 +1935,6 @@ failed:
   _commit_crop_box(p, g);
   p->cropmode = ASHIFT_CROP_OFF;
   // dt_bauhaus_combobox_set(g->cropmode, p->cropmode);
-  g->fitting = 0;
   printf("automatic cropping failed");
   return;
 }
