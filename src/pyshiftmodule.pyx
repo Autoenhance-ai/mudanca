@@ -108,4 +108,9 @@ def adjust(img):
     print(y1)
     print(x2)
     print(y2)
-    return corrected_img[x1:x2, y1:y2]
+
+    cropped = corrected_img[x1:x2, y1:y2]
+
+    print("Cropped")
+
+    return cropped
