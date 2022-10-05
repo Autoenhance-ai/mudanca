@@ -21,10 +21,10 @@
    darktable:xmp_version="5"
    darktable:raw_params="0"
    darktable:auto_presets_applied="1"
-   darktable:history_end="5"
+   darktable:history_end="6"
    darktable:iop_order_version="2"
    darktable:history_auto_hash="e1a67c2e5bc102da5d152d82e852ebba"
-   darktable:history_current_hash="e1a67c2e5bc102da5d152d82e852ebba">
+   darktable:history_current_hash="30bf31172d7f973f0cf55e80a9f832a1">
    <darktable:masks_history>
     <rdf:Seq/>
    </darktable:masks_history>
@@ -76,6 +76,16 @@
       darktable:enabled="1"
       darktable:modversion="2"
       darktable:params="ffffffff"
+      darktable:multi_name=""
+      darktable:multi_priority="0"
+      darktable:blendop_version="11"
+      darktable:blendop_params="gz14eJxjYIAACQYYOOHEgAZY0QVwggZ7CB6pfNoAAE8gGQg="/>
+     <rdf:li
+      darktable:num="5"
+      darktable:operation="ashift"
+      darktable:enabled="1"
+      darktable:modversion="5"
+      darktable:params="gz15eJzTUJPZz503044BCtLS0hyKZJ47MDCccGJgaLAHiTECsdC+v7bq/bH2Euc7bKoia+0ZRsEoGAUUAQAdQQ4B"
       darktable:multi_name=""
       darktable:multi_priority="0"
       darktable:blendop_version="11"

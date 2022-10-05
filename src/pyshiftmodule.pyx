@@ -34,9 +34,9 @@ def adjust(img):
     )
 
     smoothed = cv2.GaussianBlur(img, (9, 9), 10)
-    img = cv2.addWeighted(img, 1.5, smoothed, -0.5, 0)
+    unsharp = cv2.addWeighted(img, 1.5, smoothed, -0.5, 0)
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(unsharp, cv2.COLOR_BGR2GRAY)
 
     lines, widths, precision, _ = lsd.detect(gray)
     line_count: int = lines.shape[0]
@@ -83,11 +83,6 @@ def adjust(img):
 
     dst_points = cv2.perspectiveTransform(src_points, matrix)
 
-    # TODO: Adapt to Images where these aren't the widest or highest points
-    #
-    max_x = dst_points[1][0][0]
-    max_y = dst_points[3][0][1]
-
     x1 = int(max(dst_points[0][0][1], dst_points[1][0][1]))
     x2 = int(min(dst_points[2][0][1], dst_points[3][0][1]))
     y1 = int(max(dst_points[0][0][0], dst_points[2][0][0]))
@@ -96,15 +91,5 @@ def adjust(img):
     corrected_img = cv2.warpPerspective(img, matrix, (int(max_x), int(max_y)), flags=cv2.INTER_NEAREST)
 
     free(rects)
-
-    corrected_img = cv2.rectangle(
-        corrected_img,
-        (y1, x1),
-        (y2, x2),
-        (255, 255, 255),
-        2
-    )
-
-    # corrected_img[x1:x2, y1:y2]
-
-    return corrected_img
+    
+    return corrected_img[x1:x2, y1:y2]
