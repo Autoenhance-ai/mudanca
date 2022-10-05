@@ -1403,10 +1403,10 @@ float * shift(
 
     dt_iop_ashift_gui_data_t g;
 
-    g.rotation_range = ROTATION_RANGE_SOFT;
-    g.lensshift_v_range = LENSSHIFT_RANGE_SOFT;
-    g.lensshift_h_range = LENSSHIFT_RANGE_SOFT;
-    g.shear_range = SHEAR_RANGE_SOFT;
+    g.rotation_range = ROTATION_RANGE;
+    g.lensshift_v_range = LENSSHIFT_RANGE;
+    g.lensshift_h_range = LENSSHIFT_RANGE;
+    g.shear_range = SHEAR_RANGE;
     g.lines_in_width = width;
     g.lines_in_height = height;
     g.lines_x_off = 0.0f;
@@ -1434,7 +1434,7 @@ float * shift(
     p.ct = 0.0;
     p.cb = 1.0;
 
-    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY_NO_ROTATION;
+    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
     dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
 
     switch(res)
