@@ -1486,5 +1486,7 @@ float * shift(
     flatMatrix[7] = homograph[2][1];
     flatMatrix[8] = homograph[2][2]; 
 
+    printf("Done");
+
     return flatMatrix;
   };

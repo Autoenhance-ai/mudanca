@@ -65,6 +65,8 @@ def adjust(img):
         line_count,
         rects
     )
+    
+    print("Got Results")
 
     #s: float[9]
 
@@ -75,6 +77,8 @@ def adjust(img):
             [results[6], results[7], results[8]]
         ]
     )
+
+    print("Matrix")
 
     src_points = np.array([
         [[0,0]],
