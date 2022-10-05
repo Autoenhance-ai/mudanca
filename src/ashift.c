@@ -1395,8 +1395,8 @@ float * shift(
         input_line_count,
         rects,
         width, height,
-        0.0f, 0.0f, // TODO: Work out what these parameters do
-        1.0f, // TODO: Work out what these parameters do
+        0.0f, 0.0f,
+        1.0f,
         &lines, &lines_count,
         &vertical_count, &horizontal_count, &vertical_weight, &horizontal_weight
     ));
@@ -1409,8 +1409,8 @@ float * shift(
     g.shear_range = SHEAR_RANGE_SOFT;
     g.lines_in_width = width;
     g.lines_in_height = height;
-    g.lines_x_off = 0.0f; // TODO: Work out what these parameters do
-    g.lines_y_off = 0.0f; // TODO: Work out what these parameters do
+    g.lines_x_off = 0.0f;
+    g.lines_y_off = 0.0f;
     g.lines = lines;
     g.lines_count = lines_count;
     g.buf_width = width;

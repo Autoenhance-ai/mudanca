@@ -23,7 +23,7 @@ MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from th
 def adjust(img):
 
     lsd = cv2.createLineSegmentDetector(
-        cv2.LSD_REFINE_STD,
+        0,
         LSD_SCALE,
         LSD_SIGMA_SCALE,
         LSD_QUANT,
@@ -41,6 +41,11 @@ def adjust(img):
     lines, widths, precision, _ = lsd.detect(gray)
     line_count: int = lines.shape[0]
     height, width = gray.shape
+
+    line_img = img.copy()
+    line_img = lsd.drawSegments(line_img, np.array(lines))
+
+    cv2.imshow("Lines", line_img)
 
     cdef ashift.rect * rects = <ashift.rect*>malloc(sizeof(ashift.rect) * line_count)
 
