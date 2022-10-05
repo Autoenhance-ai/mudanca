@@ -60,11 +60,13 @@ def adjust(img):
 
         rects[line_id] = rect
 
-    results: float[9] = ashift.shift(
+    results = ashift.shift(
         width, height,
         line_count,
         rects
     )
+
+    #s: float[9]
 
     matrix = np.array(
         [
@@ -93,6 +95,13 @@ def adjust(img):
     corrected_img = cv2.warpPerspective(img, matrix, (int(width), int(height)), flags=cv2.INTER_NEAREST)
 
     print("Cleaning up")
-    free(rects)
+    # FIX: Lock
+    #
+    # free(rects)
 
+    print("Cropping Time")
+    print(x1)
+    print(y1)
+    print(x2)
+    print(y2)
     return corrected_img[x1:x2, y1:y2]
