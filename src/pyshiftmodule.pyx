@@ -60,7 +60,7 @@ def adjust(img):
 
         rects[line_id] = rect
 
-    results = ashift.shift(
+    results: float[9] = ashift.shift(
         width, height,
         line_count,
         rects
