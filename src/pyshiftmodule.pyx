@@ -81,6 +81,7 @@ def adjust(img):
         [[width,height]]
     ]).astype(np.float32)
 
+    print("Transforming Perspective")
     dst_points = cv2.perspectiveTransform(src_points, matrix)
 
     x1 = int(max(dst_points[0][0][1], dst_points[1][0][1]))
@@ -88,8 +89,10 @@ def adjust(img):
     y1 = int(max(dst_points[0][0][0], dst_points[2][0][0]))
     y2 = int(min(dst_points[1][0][0], dst_points[3][0][0]))
 
+    print("Warping Perspective")
     corrected_img = cv2.warpPerspective(img, matrix, (int(width), int(height)), flags=cv2.INTER_NEAREST)
 
+    print("Cleaning up")
     free(rects)
 
     return corrected_img[x1:x2, y1:y2]
