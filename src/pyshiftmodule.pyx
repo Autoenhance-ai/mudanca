@@ -88,8 +88,8 @@ def adjust(img):
     y1 = int(max(dst_points[0][0][0], dst_points[2][0][0]))
     y2 = int(min(dst_points[1][0][0], dst_points[3][0][0]))
 
-    corrected_img = cv2.warpPerspective(img, matrix, (int(max_x), int(max_y)), flags=cv2.INTER_NEAREST)
+    corrected_img = cv2.warpPerspective(img, matrix, (int(width), int(height)), flags=cv2.INTER_NEAREST)
 
     free(rects)
-    
+
     return corrected_img[x1:x2, y1:y2]
