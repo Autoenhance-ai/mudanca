@@ -67,9 +67,6 @@ def adjust(img):
     )
     
     print("Got Results")
-
-    #s: float[9]
-
     matrix = np.array(
         [
             [results[0], results[1], results[2]],
