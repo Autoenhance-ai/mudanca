@@ -13,3 +13,4 @@ It has been adapted to consume the results of Open CV's built-in LSD algorithmn.
 - [] Eventually port and open source as Open CV contrib module
 - [] Remove and disable debugging code
 - [] Validate inputsd
+- [] Create first release on github and pypi
