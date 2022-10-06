@@ -5,6 +5,7 @@ from libc.stdlib cimport malloc, free
 
 import array
 import cv2
+import logging
 import numpy as np
 
 LSD_SCALE = 0.99                # LSD: scaling factor for line detection
@@ -18,11 +19,12 @@ LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the imag
 MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
 MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 # TODO: Add Documentation + Validation
 #
 def adjust(img):
-
-    print("LSD")
 
     lsd = cv2.createLineSegmentDetector(
         cv2.LSD_REFINE_STD,
@@ -35,19 +37,20 @@ def adjust(img):
         LSD_N_BINS
     )
 
+    logger.info("Sharpening Image")
+
     smoothed = cv2.GaussianBlur(img, (9, 9), 10)
     unsharp = cv2.addWeighted(img, 1.5, smoothed, -0.5, 0)
 
     gray = cv2.cvtColor(unsharp, cv2.COLOR_BGR2GRAY)
 
+    logger.info("Detecting Lines")
+
     lines, widths, precision, _ = lsd.detect(gray)
     line_count: int = lines.shape[0]
     height, width = gray.shape
 
-    line_img = img.copy()
-    line_img = lsd.drawSegments(line_img, np.array(lines))
-
-    cv2.imshow("Lines", line_img)
+    logger.info("Collecting Lines")
 
     cdef ashift.rect * rects = <ashift.rect*>malloc(sizeof(ashift.rect) * line_count)
 
@@ -66,6 +69,8 @@ def adjust(img):
         rect.x = precision[line_id]
 
         rects[line_id] = rect
+
+    logger.info("Calcculating Adjustment")
 
     results: float[9] = ashift.shift(
         width, height,
@@ -95,10 +100,13 @@ def adjust(img):
     y1 = int(max(dst_points[0][0][0], dst_points[2][0][0]))
     y2 = int(min(dst_points[1][0][0], dst_points[3][0][0]))
 
+    logger.info("Warping Image")
     corrected_img = cv2.warpPerspective(img, matrix, (int(width), int(height)), flags=cv2.INTER_NEAREST)
 
-    free(rects)
-
+    logger.info("Cropping Image")
     cropped = corrected_img[x1:x2, y1:y2]
+
+    logger.info("Cleaning Up")
+    free(rects)
 
     return cropped
