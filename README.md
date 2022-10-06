@@ -14,3 +14,4 @@ It has been adapted to consume the results of Open CV's built-in LSD algorithmn.
 - [] Remove and disable debugging code
 - [] Validate inputsd
 - [] Create first release on github and pypi
+- [] Simplify the API by relying on the user passing in grayscale image and returning matrix
