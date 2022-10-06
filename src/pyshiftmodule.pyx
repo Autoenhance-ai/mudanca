@@ -29,7 +29,7 @@ def adjust(img):
     lsd = cv2.createLineSegmentDetector(
         cv2.LSD_REFINE_ADV,
         LSD_SCALE,
-        LSD_SIGMA_SCALE,
+        LSD_SIGMA_SCALE, 
         LSD_QUANT,
         LSD_ANG_TH,
         LSD_LOG_EPS,
