@@ -85,7 +85,7 @@ static void error(char * msg)
 #define DEFAULT_F_LENGTH 28.0               // focal length we assume if no exif data are available
 
 // define to get debugging output
-#define ASHIFT_DEBUG
+// #define ASHIFT_DEBUG
 
 #define SQR(a) ((a) * (a))
 

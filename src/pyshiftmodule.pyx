@@ -22,6 +22,8 @@ MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from th
 #
 def adjust(img):
 
+    print("LSD")
+
     lsd = cv2.createLineSegmentDetector(
         cv2.LSD_REFINE_STD,
         LSD_SCALE,
