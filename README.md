@@ -7,7 +7,9 @@ It has been adapted to consume the results of Open CV's built-in LSD algorithmn.
 
 ## Roadmap
 
-- [] Re-enable removal of outliers
+- [] Fix and re-enable removal of outliers for better results
 - [] Remove preprocessing steps (i.e Sharpening) or allow them to be turned off / on 
 - [] Expose flags to allow for more customization of algoritmn (i.e Disable/Enable Rotation)
 - [] Eventually port and open source as Open CV contrib module
+- [] Remove and disable debugging code
+- [] Validate inputsd

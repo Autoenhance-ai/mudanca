@@ -2,7 +2,7 @@ import cv2
 import pyshift
 import time
 
-img = cv2.imread('test.jpeg')
+img = cv2.imread('example.jpeg')
 iterations = 10
 
 for i in range(iterations):

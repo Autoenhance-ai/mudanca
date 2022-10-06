@@ -68,7 +68,7 @@ static void error(char * msg)
 #define SHEAR_RANGE 0.2                     // allowed min/max range for shear parameter
 #define MIN_LINE_LENGTH 5                   // the minimum length of a line in pixels to be regarded as relevant
 #define MAX_TANGENTIAL_DEVIATION 30         // by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
-#define RANSAC_RUNS 400                     // how many iterations to run in ransac
+#define RANSAC_RUNS 1                     // how many iterations to run in ransac
 #define RANSAC_EPSILON 2                    // starting value for ransac epsilon (in -log10 units)
 #define RANSAC_EPSILON_STEP 1               // step size of epsilon optimization (log10 units)
 #define RANSAC_ELIMINATION_RATIO 0         // percentage of lines we try to eliminate as outliers
