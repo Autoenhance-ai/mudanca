@@ -1413,6 +1413,9 @@ float * shift(
     printf("Proccessed Outliers: %i\n", _remove_outliers(&g));
     printf("Outlier Line Count: %i\n", g.lines_count);
 
+    printf("Vertical Lines: %i\n", g.vertical_count);
+    printf("Horizontal Lines: %i\n", g.horizontal_count);
+
     dt_iop_ashift_params_t p;
 
     p.rotation = 0;
