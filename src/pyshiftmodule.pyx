@@ -27,7 +27,7 @@ logger.setLevel(logging.INFO)
 def adjust(img):
 
     lsd = cv2.createLineSegmentDetector(
-        cv2.LSD_REFINE_STD,
+        cv2.LSD_REFINE_ADV,
         LSD_SCALE,
         LSD_SIGMA_SCALE,
         LSD_QUANT,
