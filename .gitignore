@@ -2,3 +2,4 @@ build/
 *.egg-info
 **/pyshiftmodule.c
 corrected-*.jpeg
+.DS_Store
