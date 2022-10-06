@@ -1,12 +1,10 @@
 import cv2
 import pyshift
+import time
 
-img = cv2.imread('example.jpeg')
-adjusted_img = pyshift.adjust(img)
+img = cv2.imread('test.jpeg')
+iterations = 10
 
-cv2.imwrite('corrected.jpeg', adjusted_img)
-
-cv2.imshow("Original", img)
-cv2.imshow("Corrected", adjusted_img)
-
-cv2.waitKey(0)
+for i in range(iterations):
+    adjusted_img = pyshift.adjust(img)
+    cv2.imwrite(f'corrected-{i}.jpeg', adjusted_img)

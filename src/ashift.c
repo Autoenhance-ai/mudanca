@@ -71,7 +71,7 @@ static void error(char * msg)
 #define RANSAC_RUNS 400                     // how many iterations to run in ransac
 #define RANSAC_EPSILON 2                    // starting value for ransac epsilon (in -log10 units)
 #define RANSAC_EPSILON_STEP 1               // step size of epsilon optimization (log10 units)
-#define RANSAC_ELIMINATION_RATIO 60         // percentage of lines we try to eliminate as outliers
+#define RANSAC_ELIMINATION_RATIO 0         // percentage of lines we try to eliminate as outliers
 #define RANSAC_OPTIMIZATION_STEPS 5         // home many steps to optimize epsilon
 #define RANSAC_OPTIMIZATION_DRY_RUNS 50     // how man runs per optimization steps
 #define RANSAC_HURDLE 5                     // hurdle rate: the number of lines below which we do a complete permutation instead of random sampling
@@ -79,16 +79,13 @@ static void error(char * msg)
 #define NMS_EPSILON 1e-3                    // break criterion for Nelder-Mead simplex
 #define NMS_SCALE 1.0                       // scaling factor for Nelder-Mead simplex
 #define NMS_ITERATIONS 400                  // number of iterations for Nelder-Mead simplex
-#define NMS_CROP_EPSILON 100.0              // break criterion for Nelder-Mead simplex on crop fitting
-#define NMS_CROP_SCALE 0.5                  // scaling factor for Nelder-Mead simplex on crop fitting
-#define NMS_CROP_ITERATIONS 100             // number of iterations for Nelder-Mead simplex on crop fitting
 #define NMS_ALPHA 1.0                       // reflection coefficient for Nelder-Mead simplex
 #define NMS_BETA 0.5                        // contraction coefficient for Nelder-Mead simplex
 #define NMS_GAMMA 2.0                       // expansion coefficient for Nelder-Mead simplex
 #define DEFAULT_F_LENGTH 28.0               // focal length we assume if no exif data are available
 
 // define to get debugging output
-// #undef ASHIFT_DEBUG
+#define ASHIFT_DEBUG
 
 #define SQR(a) ((a) * (a))
 
@@ -1379,7 +1376,6 @@ float * shift(
     printf("Shift\n");
     printf("Width: %f\n", width);
     printf("Height: %f\n", height);
-    printf("Input Line Count: %i\n", input_line_count);
 
     dt_iop_ashift_line_t *lines;
     int lines_count;
@@ -1413,9 +1409,9 @@ float * shift(
     g.buf_width = width;
     g.buf_height = height;
 
-    printf("Processed Line Count: %i\n", lines_count);
+    printf("Processed Line Count: %i\n", g.lines_count);
     printf("Proccessed Outliers: %i\n", _remove_outliers(&g));
-    printf("Outlier Line Count: %i\n", lines_count);
+    printf("Outlier Line Count: %i\n", g.lines_count);
 
     dt_iop_ashift_params_t p;
 
@@ -1461,16 +1457,6 @@ float * shift(
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
               p.orthocorr, p.aspect, width, height, ASHIFT_HOMOGRAPH_FORWARD);
 
-    printf("[[ %f,", homograph[0][0]);
-    printf("%f,", homograph[0][1]);
-    printf("%f],\n", homograph[0][2]);
-    printf("[%f,", homograph[1][0]);
-    printf("%f,", homograph[1][1]);
-    printf("%f],\n", homograph[1][2]);
-    printf("[%f,", homograph[2][0]);
-    printf("%f,", homograph[2][1]);
-    printf("%f]]\n", homograph[2][2]);
-
     float *flatMatrix = malloc(sizeof(float) * 9);
 
     flatMatrix[0] = homograph[0][0];
@@ -1482,8 +1468,6 @@ float * shift(
     flatMatrix[6] = homograph[2][0];
     flatMatrix[7] = homograph[2][1];
     flatMatrix[8] = homograph[2][2]; 
-
-    printf("Done");
 
     return flatMatrix;
   };
