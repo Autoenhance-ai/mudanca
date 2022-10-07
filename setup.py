@@ -12,9 +12,5 @@ setup (name = 'Pyshift',
        author="James Campbell",
        description = 'An implementation of the shift algorithmn for python ported from Darktable & Nshift',
        ext_modules = cythonize([module], compiler_directives={'language_level' : "3"}),
-       include_dirs=[numpy.get_include()],
-       requires=[
-              'numpy',
-              'cv2'
-       ]
+       include_dirs=[numpy.get_include()]
 )
