@@ -18,7 +18,7 @@ LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the imag
 MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
 MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 
-# TODO: Add Documentation + Validation
+#
 #
 def adjust(img, refine=cv2.LSD_REFINE_STD):
 

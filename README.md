@@ -9,7 +9,8 @@ It has been adapted to consume the results of Open CV's built-in LSD algorithmn.
 
 - [] Expose flags to allow for more customization of algoritmn (i.e Disable/Enable Rotation)
 - [] Eventually port and open source as Open CV contrib module
-- [] Validate inputsd
+- [] Validate inputs
+- [] Write tests
 - [] Exit in a way python treats as an error
 - [] Publish to Pypi
 - [] Trim code what's needed and rename dt prefixes
