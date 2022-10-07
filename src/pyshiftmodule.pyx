@@ -24,10 +24,10 @@ logger.setLevel(logging.INFO)
 
 # TODO: Add Documentation + Validation
 #
-def adjust(img):
+def adjust(img, refine=cv2.LSD_REFINE_STD):
 
     lsd = cv2.createLineSegmentDetector(
-        cv2.LSD_REFINE_ADV,
+        refine,
         LSD_SCALE,
         LSD_SIGMA_SCALE, 
         LSD_QUANT,
