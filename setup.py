@@ -2,12 +2,12 @@ from Cython.Build import cythonize
 from distutils.core import setup, Extension
 import numpy
 
-module = Extension('pyshift', sources = [
+module = Extension('shiftpy', sources = [
        'src/ashift.c',
-       'src/pyshiftmodule.pyx'
+       'src/shiftpymodule.pyx'
 ])
 
-setup (name = 'pyshift',
+setup (name = 'shiftpy',
        version = '1.1',
        author="James Campbell",
        description = 'An implementation of the shift algorithmn for python ported from Darktable & Nshift',

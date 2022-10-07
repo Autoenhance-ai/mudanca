@@ -1,5 +1,5 @@
 import cv2
-import pyshift
+import shiftpy
 
 img = cv2.imread('example.jpeg')
 iterations = 10
@@ -7,7 +7,7 @@ iterations = 10
 for i in range(iterations):
 
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    matrix, cropbox = pyshift.adjust(grey, pyshift.FIT_VERTICALLY)
+    matrix, cropbox = shiftpy.adjust(grey, shiftpy.FIT_VERTICALLY)
     
     height, width, _ = img.shape
     x1, y1 = cropbox[0]

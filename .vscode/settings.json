@@ -28,6 +28,7 @@
         "stdio.h": "c",
         "math.h": "c",
         "assert.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "stddef.h": "c"
     }
 }
