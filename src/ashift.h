@@ -8,5 +8,6 @@ typedef struct rect
 extern float * shift(
     float width, float height,
     int input_line_count,
-    rect rects[]
+    rect rects[],
+    int options
 );

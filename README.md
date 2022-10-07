@@ -8,8 +8,3 @@ which itself was based on ShiftN (https://www.shiftn.de).
 ```
 pip install. && python -m pytest
 ```
-
-## Roadmap
-
-- [] Expose flags to allow for more customization of algoritmn (i.e Disable/Enable Rotation)
-- [] Publish to Pypi

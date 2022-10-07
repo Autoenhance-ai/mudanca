@@ -5,4 +5,4 @@ cdef extern from "ashift.h":
         double width;
         double precision;
         
-    float * shift(float width, float height, int input_line_count, rect rects[]);
+    float * shift(float width, float height, int input_line_count, rect rects[], int options);

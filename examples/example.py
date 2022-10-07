@@ -7,7 +7,7 @@ iterations = 10
 for i in range(iterations):
 
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    matrix, cropbox = pyshift.adjust(grey)
+    matrix, cropbox = pyshift.adjust(grey, pyshift.FIT_VERTICALLY)
     
     height, width, _ = img.shape
     x1, y1 = cropbox[0]

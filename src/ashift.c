@@ -1036,7 +1036,8 @@ static shift_iop_ashift_nmsresult_t nmsfit(shift_iop_ashift_gui_data_t *g, shift
 float * shift(
     float width, float height,
     int input_line_count,
-    rect rects[]
+    rect rects[],
+    int options
 ) {
 
     shift_iop_ashift_line_t *lines;
@@ -1090,7 +1091,7 @@ float * shift(
     p.ct = 0.0;
     p.cb = 1.0;
 
-    shift_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
+    shift_iop_ashift_fitaxis_t dir = options;
     shift_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
 
     switch(res)

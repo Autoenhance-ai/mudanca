@@ -18,11 +18,28 @@ LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the imag
 MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
 MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 
+FIT_NONE         = 0         #no Adjustments
+FIT_ROTATION     = 1 << 0    # flag indicates to fit rotation angle
+FIT_LENS_VERT    = 1 << 1    # flag indicates to fit vertical lens shift
+FIT_LENS_HOR     = 1 << 2    # flag indicates to fit horizontal lens shift
+FIT_SHEAR        = 1 << 3   # flag indicates to fit shear parameter
+FIT_LINES_VERT   = 1 << 4   # use vertical lines for fitting
+FIT_LINES_HOR    = 1 << 5   # use horizontal lines for fitting
+FIT_LENS_BOTH    = FIT_LENS_VERT | FIT_LENS_HOR
+FIT_LINES_BOTH   = FIT_LINES_VERT | FIT_LINES_HOR
+FIT_VERTICALLY   = FIT_ROTATION | FIT_LENS_VERT | FIT_LINES_VERT
+FIT_HORIZONTALLY = FIT_ROTATION | FIT_LENS_HOR | FIT_LINES_HOR,
+FIT_BOTH         = FIT_ROTATION | FIT_LENS_VERT | FIT_LENS_HOR | FIT_LINES_VERT | FIT_LINES_HOR,
+FIT_VERTICALLY_NO_ROTATION = FIT_LENS_VERT | FIT_LINES_VERT
+FIT_HORIZONTALLY_NO_ROTATION = FIT_LENS_HOR | FIT_LINES_HOR
+FIT_BOTH_NO_ROTATION = FIT_LENS_VERT | FIT_LENS_HOR | FIT_LINES_VERT | FIT_LINES_HOR
+FIT_BOTH_SHEAR = FIT_ROTATION | FIT_LENS_VERT | FIT_LENS_HOR | FIT_SHEAR | FIT_LINES_VERT | FIT_LINES_HOR
+FIT_ROTATION_VERTICAL_LINES = FIT_ROTATION | FIT_LINES_VERT
+FIT_ROTATION_HORIZONTAL_LINES = FIT_ROTATION | FIT_LINES_HOR
+FIT_ROTATION_BOTH_LINES = FIT_ROTATION | FIT_LINES_VERT | FIT_LINES_HOR
+FIT_FLIP = FIT_LENS_VERT | FIT_LENS_HOR | FIT_LINES_VERT | FIT_LINES_HOR
 
-
-# 
-#
-def adjust(img, refine=cv2.LSD_REFINE_STD):
+def adjust(img, options, refine=cv2.LSD_REFINE_STD):
 
     if len(img.shape) != 2:
         raise Exception('Image must be grayscale')
@@ -70,7 +87,8 @@ def adjust(img, refine=cv2.LSD_REFINE_STD):
     results: float[9] = ashift.shift(
         width, height,
         line_count,
-        rects
+        rects,
+        options
     )
     
     matrix = np.array(
