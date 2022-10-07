@@ -308,20 +308,6 @@ static inline void vec3prodn(float *dst, const float *const v1, const float *con
   dst[2] = l3 * f;
 }
 
-// normalize a 3x1 vector so that x^2 + y^2 + z^2 = 1
-// dst and v may be the same
-static inline void vec3norm(float *dst, const float *const v)
-{
-  const float sq = sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-
-  // special handling for an all-zero vector
-  const float f = sq > 0.0f ? 1.0f / sq : 1.0f;
-
-  dst[0] = v[0] * f;
-  dst[1] = v[1] * f;
-  dst[2] = v[2] * f;
-}
-
 // normalize a 3x1 vector so that x^2 + y^2 = 1; a useful normalization for
 // lines in homogeneous coordinates
 // dst and v may be the same
@@ -341,13 +327,6 @@ static inline void vec3lnorm(float *dst, const float *const v)
 static inline float vec3scalar(const float *const v1, const float *const v2)
 {
   return (v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]);
-}
-
-// check if 3x1 vector is (very close to) null
-static inline int vec3isnull(const float *const v)
-{
-  const float eps = 1e-10f;
-  return (fabsf(v[0]) < eps && fabsf(v[1]) < eps && fabsf(v[2]) < eps);
 }
 
 // process detectedlines according
