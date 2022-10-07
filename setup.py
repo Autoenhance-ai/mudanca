@@ -7,7 +7,7 @@ module = Extension('pyshift', sources = [
        'src/pyshiftmodule.pyx'
 ])
 
-setup (name = 'Pyshift',
+setup (name = 'pyshift',
        version = '1.1',
        author="James Campbell",
        description = 'An implementation of the shift algorithmn for python ported from Darktable & Nshift',
