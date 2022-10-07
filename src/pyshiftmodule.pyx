@@ -42,13 +42,11 @@ def adjust(img):
     smoothed = cv2.GaussianBlur(img, (9, 9), 10)
     unsharp = cv2.addWeighted(img, 1.5, smoothed, -0.5, 0)
 
-    gray = cv2.cvtColor(unsharp, cv2.COLOR_BGR2GRAY)
-
     logger.info("Detecting Lines")
 
-    lines, widths, precision, _ = lsd.detect(gray)
+    lines, widths, precision, _ = lsd.detect(img)
     line_count: int = lines.shape[0]
-    height, width = gray.shape
+    height, width = img.shape
 
     logger.info("Collecting Lines")
 
@@ -100,13 +98,12 @@ def adjust(img):
     y1 = int(max(dst_points[0][0][0], dst_points[2][0][0]))
     y2 = int(min(dst_points[1][0][0], dst_points[3][0][0]))
 
-    logger.info("Warping Image")
-    corrected_img = cv2.warpPerspective(img, matrix, (int(width), int(height)), flags=cv2.INTER_NEAREST)
-
-    logger.info("Cropping Image")
-    cropped = corrected_img[x1:x2, y1:y2]
+    cropbox = [
+        (x1, y1),
+        (x2, y2)
+    ]
 
     logger.info("Cleaning Up")
     free(rects)
 
-    return cropped
+    return matrix, cropbox
