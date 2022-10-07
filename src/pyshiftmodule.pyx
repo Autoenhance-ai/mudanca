@@ -37,11 +37,6 @@ def adjust(img, refine=cv2.LSD_REFINE_STD):
         LSD_N_BINS
     )
 
-    logger.info("Sharpening Image")
-
-    smoothed = cv2.GaussianBlur(img, (9, 9), 10)
-    unsharp = cv2.addWeighted(img, 1.5, smoothed, -0.5, 0)
-
     logger.info("Detecting Lines")
 
     lines, widths, precision, _ = lsd.detect(img)
