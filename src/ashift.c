@@ -1038,9 +1038,6 @@ float * shift(
     int input_line_count,
     rect rects[]
 ) {
-    printf("Shift\n");
-    printf("Width: %f\n", width);
-    printf("Height: %f\n", height);
 
     dt_iop_ashift_line_t *lines;
     int lines_count;
@@ -1049,7 +1046,7 @@ float * shift(
     float vertical_weight;
     float horizontal_weight;
 
-   printf("Line Process: %i\n", line_prcoess(
+    line_prcoess(
         input_line_count,
         rects,
         width, height,
@@ -1057,7 +1054,7 @@ float * shift(
         1.0f,
         &lines, &lines_count,
         &vertical_count, &horizontal_count, &vertical_weight, &horizontal_weight
-    ));
+    );
 
     dt_iop_ashift_gui_data_t g;
 
@@ -1078,9 +1075,6 @@ float * shift(
     g.horizontal_weight =horizontal_weight;
     g.vertical_count = vertical_count;
     g.horizontal_count = horizontal_count;
-
-    printf("Vertical Lines: %i\n", g.vertical_count);
-    printf("Horizontal Lines: %i\n", g.horizontal_count);
 
     dt_iop_ashift_params_t p;
 
@@ -1116,11 +1110,6 @@ float * shift(
         printf("Successfully adjusted\n");
         break;
     }
-
-    printf("R: %f\n", p.rotation);
-    printf("LV: %f\n", p.lensshift_v);
-    printf("LH: %f\n", p.lensshift_h);
-    printf("S: %f\n", p.shear);
 
     float homograph[3][3];
     homography((float *)homograph, p.rotation, p.lensshift_v, p.lensshift_h, p.shear, DEFAULT_F_LENGTH,
