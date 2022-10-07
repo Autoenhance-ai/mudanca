@@ -1,6 +1,6 @@
 build/
 dist/
 *.egg-info
-**/shiftpymodule.c
+**/mudancamodule.c
 corrected-*.jpeg
 .DS_Store

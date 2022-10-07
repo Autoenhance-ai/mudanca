@@ -3,4 +3,4 @@ include src/ashift.c
 include src/ashift_nmsimplex.c
 include src/math.h
 include src/ashift.pxd
-include src/shiftpymodule.pyx
+include src/mudancamodule.pyx

@@ -2,13 +2,13 @@ from Cython.Build import cythonize
 from distutils.core import setup, Extension
 import numpy
 
-module = Extension('shiftpy', sources = [
+module = Extension('mudanca', sources = [
        'src/ashift.c',
-       'src/shiftpymodule.pyx'
+       'src/mudancamodule.pyx'
 ])
 
-setup (name = 'shiftpy',
-       version = '1.1',
+setup (name = 'mudanca',
+       version = '1.2',
        author="James Campbell",
        description = 'An implementation of the shift algorithmn for python ported from Darktable & Nshift',
        ext_modules = cythonize([module], compiler_directives={'language_level' : "3"}),

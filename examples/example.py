@@ -1,5 +1,5 @@
 import cv2
-import shiftpy
+import mudanca
 
 img = cv2.imread('example.jpeg')
 iterations = 10
@@ -7,7 +7,7 @@ iterations = 10
 for i in range(iterations):
 
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    matrix, cropbox = shiftpy.adjust(grey, shiftpy.FIT_VERTICALLY)
+    matrix, cropbox = mudanca.adjust(grey, mudanca.FIT_VERTICALLY)
     
     height, width, _ = img.shape
     x1, y1 = cropbox[0]
