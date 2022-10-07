@@ -13,4 +13,3 @@ pip install. && python -m pytest
 
 - [] Expose flags to allow for more customization of algoritmn (i.e Disable/Enable Rotation)
 - [] Publish to Pypi
-- [] Trim code what's needed and rename dt prefixes

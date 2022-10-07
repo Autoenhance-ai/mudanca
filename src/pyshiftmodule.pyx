@@ -63,7 +63,7 @@ def adjust(img, refine=cv2.LSD_REFINE_STD):
         rect.y2 = y2
 
         rect.width = widths[line_id]
-        rect.x = precision[line_id]
+        rect.precision = precision[line_id]
 
         rects[line_id] = rect
 

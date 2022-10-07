@@ -30,7 +30,7 @@
 
 #include "math.h"
 
-#define DT_ALIGNED_ARRAY __attribute__((aligned(64)))
+#define shift_ALIGNED_ARRAY __attribute__((aligned(64)))
 
 #ifndef FALSE
 #define FALSE 0
@@ -94,13 +94,13 @@ static void error(char * msg)
 /** Rectangle structure: line segment with width.
  */
 
-typedef enum dt_iop_ashift_homodir_t
+typedef enum shift_iop_ashift_homodir_t
 {
   ASHIFT_HOMOGRAPH_FORWARD,
   ASHIFT_HOMOGRAPH_INVERTED
-} dt_iop_ashift_homodir_t;
+} shift_iop_ashift_homodir_t;
 
-typedef enum dt_iop_ashift_linetype_t
+typedef enum shift_iop_ashift_linetype_t
 {
   ASHIFT_LINE_IRRELEVANT   = 0,       // the line is found to be not interesting
                                       // eg. too short, or not horizontal or vertical
@@ -112,9 +112,9 @@ typedef enum dt_iop_ashift_linetype_t
   ASHIFT_LINE_VERTICAL_SELECTED = ASHIFT_LINE_RELEVANT | ASHIFT_LINE_DIRVERT | ASHIFT_LINE_SELECTED,
   ASHIFT_LINE_HORIZONTAL_SELECTED = ASHIFT_LINE_RELEVANT | ASHIFT_LINE_SELECTED,
   ASHIFT_LINE_MASK = ASHIFT_LINE_RELEVANT | ASHIFT_LINE_DIRVERT | ASHIFT_LINE_SELECTED
-} dt_iop_ashift_linetype_t;
+} shift_iop_ashift_linetype_t;
 
-typedef enum dt_iop_ashift_fitaxis_t
+typedef enum shift_iop_ashift_fitaxis_t
 {
   ASHIFT_FIT_NONE          = 0,       // none
   ASHIFT_FIT_ROTATION      = 1 << 0,  // flag indicates to fit rotation angle
@@ -139,23 +139,23 @@ typedef enum dt_iop_ashift_fitaxis_t
   ASHIFT_FIT_ROTATION_HORIZONTAL_LINES = ASHIFT_FIT_ROTATION | ASHIFT_FIT_LINES_HOR,
   ASHIFT_FIT_ROTATION_BOTH_LINES = ASHIFT_FIT_ROTATION | ASHIFT_FIT_LINES_VERT | ASHIFT_FIT_LINES_HOR,
   ASHIFT_FIT_FLIP = ASHIFT_FIT_LENS_VERT | ASHIFT_FIT_LENS_HOR | ASHIFT_FIT_LINES_VERT | ASHIFT_FIT_LINES_HOR
-} dt_iop_ashift_fitaxis_t;
+} shift_iop_ashift_fitaxis_t;
 
-typedef enum dt_iop_ashift_nmsresult_t
+typedef enum shift_iop_ashift_nmsresult_t
 {
   NMS_SUCCESS = 0,
   NMS_NOT_ENOUGH_LINES = 1,
   NMS_DID_NOT_CONVERGE = 2,
   NMS_INSANE = 3
-} dt_iop_ashift_nmsresult_t;
+} shift_iop_ashift_nmsresult_t;
 
-typedef enum dt_iop_ashift_mode_t
+typedef enum shift_iop_ashift_mode_t
 {
   ASHIFT_MODE_GENERIC = 0, // $DESCRIPTION: "generic"
   ASHIFT_MODE_SPECIFIC = 1 // $DESCRIPTION: "specific"
-} dt_iop_ashift_mode_t;
+} shift_iop_ashift_mode_t;
 
-typedef struct dt_iop_ashift_params_t
+typedef struct shift_iop_ashift_params_t
 {
   float rotation;    // $MIN: -ROTATION_RANGE_SOFT $MAX: ROTATION_RANGE_SOFT $DEFAULT: 0.0
   float lensshift_v; // $MIN: -LENSSHIFT_RANGE_SOFT $MAX: LENSSHIFT_RANGE_SOFT $DEFAULT: 0.0 $DESCRIPTION: "lens shift (vertical)"
@@ -165,31 +165,31 @@ typedef struct dt_iop_ashift_params_t
   float crop_factor; // $MIN: 0.5 $MAX: 10.0 $DEFAULT: 1.0 $DESCRIPTION: "crop factor"
   float orthocorr;   // $MIN: 0.0 $MAX: 100.0 $DEFAULT: 100.0 $DESCRIPTION: "lens dependence"
   float aspect;      // $MIN: 0.5 $MAX: 2.0 $DEFAULT: 1.0 $DESCRIPTION: "aspect adjust"
-  dt_iop_ashift_mode_t mode;     // $DEFAULT: ASHIFT_MODE_GENERIC $DESCRIPTION: "lens model"
+  shift_iop_ashift_mode_t mode;     // $DEFAULT: ASHIFT_MODE_GENERIC $DESCRIPTION: "lens model"
   float cl;          // $DEFAULT: 0.0
   float cr;          // $DEFAULT: 1.0
   float ct;          // $DEFAULT: 0.0
   float cb;          // $DEFAULT: 1.0
-} dt_iop_ashift_params_t;
+} shift_iop_ashift_params_t;
 
-typedef struct dt_iop_ashift_line_t
+typedef struct shift_iop_ashift_line_t
 {
   float p1[3];
   float p2[3];
   float length;
   float width;
   float weight;
-  dt_iop_ashift_linetype_t type;
+  shift_iop_ashift_linetype_t type;
   // homogeneous coordinates:
   float L[3];
-} dt_iop_ashift_line_t;
+} shift_iop_ashift_line_t;
 
-typedef struct dt_iop_ashift_fit_params_t
+typedef struct shift_iop_ashift_fit_params_t
 {
   int params_count;
-  dt_iop_ashift_linetype_t linetype;
-  dt_iop_ashift_linetype_t linemask;
-  dt_iop_ashift_line_t *lines;
+  shift_iop_ashift_linetype_t linetype;
+  shift_iop_ashift_linetype_t linemask;
+  shift_iop_ashift_line_t *lines;
   int lines_count;
   int width;
   int height;
@@ -205,9 +205,9 @@ typedef struct dt_iop_ashift_fit_params_t
   float lensshift_v_range;
   float lensshift_h_range;
   float shear_range;
-} dt_iop_ashift_fit_params_t;
+} shift_iop_ashift_fit_params_t;
 
-typedef struct dt_iop_ashift_cropfit_params_t
+typedef struct shift_iop_ashift_cropfit_params_t
 {
   int width;
   int height;
@@ -216,15 +216,15 @@ typedef struct dt_iop_ashift_cropfit_params_t
   float alpha;
   float homograph[3][3];
   float edges[4][3];
-} dt_iop_ashift_cropfit_params_t;
+} shift_iop_ashift_cropfit_params_t;
 
-typedef struct dt_iop_ashift_gui_data_t
+typedef struct shift_iop_ashift_gui_data_t
 {
   float rotation_range;
   float lensshift_v_range;
   float lensshift_h_range;
   float shear_range;
-  dt_iop_ashift_line_t *lines;
+  shift_iop_ashift_line_t *lines;
   int lines_in_width;
   int lines_in_height;
   int lines_x_off;
@@ -242,11 +242,11 @@ typedef struct dt_iop_ashift_gui_data_t
   float buf_scale;
   int jobparams;
   int adjust_crop;
-  float cl;	// shadow copy of dt_iop_ashift_data_t.cl
-  float cr;	// shadow copy of dt_iop_ashift_data_t.cr
-  float ct;	// shadow copy of dt_iop_ashift_data_t.ct
-  float cb;	// shadow copy of dt_iop_ashift_data_t.cb
-} dt_iop_ashift_gui_data_t;
+  float cl;	// shadow copy of shift_iop_ashift_data_t.cl
+  float cr;	// shadow copy of shift_iop_ashift_data_t.cr
+  float ct;	// shadow copy of shift_iop_ashift_data_t.ct
+  float cb;	// shadow copy of shift_iop_ashift_data_t.cb
+} shift_iop_ashift_gui_data_t;
 
 #define generate_mat3inv_body(c_type, A, B)                                                                  \
   int mat3inv_##c_type(c_type *const dst, const c_type *const src)                                           \
@@ -358,12 +358,12 @@ static int line_prcoess(
     const int width, const int height,
     const int x_off, const int y_off,
     const float scale,
-    dt_iop_ashift_line_t **alines,
+    shift_iop_ashift_line_t **alines,
     int *lcount, int *vcount, int *hcount,
     float *vweight, float *hweight
 ) {
 
-  dt_iop_ashift_line_t *ashift_lines = NULL;
+  shift_iop_ashift_line_t *ashift_lines = NULL;
 
   int vertical_count = 0;
   int horizontal_count = 0;
@@ -375,7 +375,7 @@ static int line_prcoess(
   if(lines_count > 0)
   {
     // aggregate lines data into our own structures
-    ashift_lines = (dt_iop_ashift_line_t *)malloc(sizeof(dt_iop_ashift_line_t) * lines_count);
+    ashift_lines = (shift_iop_ashift_line_t *)malloc(sizeof(shift_iop_ashift_line_t) * lines_count);
     if(ashift_lines == NULL) goto error;
 
     for(int n = 0; n < lines_count; n++)
@@ -428,7 +428,7 @@ static int line_prcoess(
       ashift_lines[lct].width = line.width / scale;
 
       // ...  and weight (= length * width * angle precision)
-      const float weight = ashift_lines[lct].length * ashift_lines[lct].width * line.x;
+      const float weight = ashift_lines[lct].length * ashift_lines[lct].width * line.precision;
       ashift_lines[lct].weight = weight;
 
 
@@ -439,7 +439,7 @@ static int line_prcoess(
       const int relevant = ashift_lines[lct].length > MIN_LINE_LENGTH ? 1 : 0;
 
       // register type of line
-      dt_iop_ashift_linetype_t type = ASHIFT_LINE_IRRELEVANT;
+      shift_iop_ashift_linetype_t type = ASHIFT_LINE_IRRELEVANT;
       if(vertical && relevant)
       {
         type = ASHIFT_LINE_VERTICAL_SELECTED;
@@ -516,7 +516,7 @@ static inline double ilogit(double L, double min, double max)
 
 static void homography(float *homograph, const float angle, const float shift_v, const float shift_h,
                        const float shear, const float f_length_kb, const float orthocorr, const float aspect,
-                       const int width, const int height, dt_iop_ashift_homodir_t dir)
+                       const int width, const int height, shift_iop_ashift_homodir_t dir)
 {
   // calculate homograph that combines all translations, rotations
   // and warping into one single matrix operation.
@@ -738,10 +738,10 @@ static void homography(float *homograph, const float angle, const float shift_v,
 //    * sum over weighted s^2 values
 static double model_fitness(double *params, void *data)
 {
-  dt_iop_ashift_fit_params_t *fit = (dt_iop_ashift_fit_params_t *)data;
+  shift_iop_ashift_fit_params_t *fit = (shift_iop_ashift_fit_params_t *)data;
 
   // just for convenience: get shorter names
-  dt_iop_ashift_line_t *lines = fit->lines;
+  shift_iop_ashift_line_t *lines = fit->lines;
   const int lines_count = fit->lines_count;
   const int width = fit->width;
   const int height = fit->height;
@@ -859,7 +859,7 @@ static double model_fitness(double *params, void *data)
 }
 
 // setup all data structures for fitting and call NM simplex
-static dt_iop_ashift_nmsresult_t nmsfit(dt_iop_ashift_gui_data_t *g, dt_iop_ashift_params_t *p, dt_iop_ashift_fitaxis_t dir)
+static shift_iop_ashift_nmsresult_t nmsfit(shift_iop_ashift_gui_data_t *g, shift_iop_ashift_params_t *p, shift_iop_ashift_fitaxis_t dir)
 {
   if(!g->lines) return NMS_NOT_ENOUGH_LINES;
   if(dir == ASHIFT_FIT_NONE) return NMS_SUCCESS;
@@ -869,7 +869,7 @@ static dt_iop_ashift_nmsresult_t nmsfit(dt_iop_ashift_gui_data_t *g, dt_iop_ashi
   int enough_lines = TRUE;
 
   // initialize fit parameters
-  dt_iop_ashift_fit_params_t fit;
+  shift_iop_ashift_fit_params_t fit;
   fit.lines = g->lines;
   fit.lines_count = g->lines_count;
   fit.width = g->lines_in_width;
@@ -892,11 +892,11 @@ static dt_iop_ashift_nmsresult_t nmsfit(dt_iop_ashift_gui_data_t *g, dt_iop_ashi
 
   // if the image is flipped and if we do not want to fit both lens shift
   // directions or none at all, then we need to change direction
-  dt_iop_ashift_fitaxis_t mdir = dir;
+  shift_iop_ashift_fitaxis_t mdir = dir;
 
   // prepare fit structure and starting parameters for simplex fit.
   // note: the sequence of parameters in params[] needs to match the
-  // respective order in dt_iop_ashift_fit_params_t. Parameters which are
+  // respective order in shift_iop_ashift_fit_params_t. Parameters which are
   // to be fittet are marked with NAN in the fit structure. Non-NAN
   // parameters are assumed to be constant.
   if(mdir & ASHIFT_FIT_ROTATION)
@@ -1039,7 +1039,7 @@ float * shift(
     rect rects[]
 ) {
 
-    dt_iop_ashift_line_t *lines;
+    shift_iop_ashift_line_t *lines;
     int lines_count;
     int vertical_count;
     int horizontal_count;
@@ -1056,7 +1056,7 @@ float * shift(
         &vertical_count, &horizontal_count, &vertical_weight, &horizontal_weight
     );
 
-    dt_iop_ashift_gui_data_t g;
+    shift_iop_ashift_gui_data_t g;
 
     g.rotation_range = ROTATION_RANGE;
     g.lensshift_v_range = LENSSHIFT_RANGE;
@@ -1076,7 +1076,7 @@ float * shift(
     g.vertical_count = vertical_count;
     g.horizontal_count = horizontal_count;
 
-    dt_iop_ashift_params_t p;
+    shift_iop_ashift_params_t p;
 
     p.rotation = 0;
     p.lensshift_v = 0;
@@ -1090,8 +1090,8 @@ float * shift(
     p.ct = 0.0;
     p.cb = 1.0;
 
-    dt_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
-    dt_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
+    shift_iop_ashift_fitaxis_t dir = ASHIFT_FIT_VERTICALLY;
+    shift_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
 
     switch(res)
     {
