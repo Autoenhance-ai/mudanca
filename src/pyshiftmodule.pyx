@@ -5,7 +5,6 @@ from libc.stdlib cimport malloc, free
 
 import array
 import cv2
-import logging
 import numpy as np
 
 LSD_SCALE = 0.99                # LSD: scaling factor for line detection
@@ -18,9 +17,6 @@ LSD_N_BINS = 1024               # LSD: number of bins in pseudo-ordering of grad
 LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the image where lines will be discarded
 MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
 MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 # TODO: Add Documentation + Validation
 #
@@ -37,13 +33,9 @@ def adjust(img, refine=cv2.LSD_REFINE_STD):
         LSD_N_BINS
     )
 
-    logger.info("Detecting Lines")
-
     lines, widths, precision, _ = lsd.detect(img)
     line_count: int = lines.shape[0]
     height, width = img.shape
-
-    logger.info("Collecting Lines")
 
     cdef ashift.rect * rects = <ashift.rect*>malloc(sizeof(ashift.rect) * line_count)
 
@@ -62,8 +54,6 @@ def adjust(img, refine=cv2.LSD_REFINE_STD):
         rect.x = precision[line_id]
 
         rects[line_id] = rect
-
-    logger.info("Calcculating Adjustment")
 
     results: float[9] = ashift.shift(
         width, height,
@@ -98,7 +88,6 @@ def adjust(img, refine=cv2.LSD_REFINE_STD):
         (x2, y2)
     ]
 
-    logger.info("Cleaning Up")
     free(rects)
 
     return matrix, cropbox

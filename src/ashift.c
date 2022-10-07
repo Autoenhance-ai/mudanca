@@ -1107,7 +1107,6 @@ float * shift(
         break;
       case NMS_SUCCESS:
       default:
-        printf("Successfully adjusted\n");
         break;
     }
 
