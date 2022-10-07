@@ -18,9 +18,17 @@ LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the imag
 MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
 MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 
-#
+
+
+# 
 #
 def adjust(img, refine=cv2.LSD_REFINE_STD):
+
+    if len(img.shape) != 2:
+        raise Exception('Image must be grayscale')
+
+    if img.dtype != np.uint8:
+        raise Exception('Image must be a type of uint8')
 
     lsd = cv2.createLineSegmentDetector(
         refine,
@@ -34,8 +42,12 @@ def adjust(img, refine=cv2.LSD_REFINE_STD):
     )
 
     lines, widths, precision, _ = lsd.detect(img)
-    line_count: int = lines.shape[0]
     height, width = img.shape
+
+    if lines is None:
+        return None
+
+    line_count: int = lines.shape[0]
 
     cdef ashift.rect * rects = <ashift.rect*>malloc(sizeof(ashift.rect) * line_count)
 
