@@ -6,5 +6,5 @@ which itself was based on ShiftN (https://www.shiftn.de).
 ## Running Tests
 
 ```
-pip install. && python -m pytest
+pip install . && python -m pytest
 ```
