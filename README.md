@@ -12,3 +12,4 @@ It has been adapted to consume the results of Open CV's built-in LSD algorithmn.
 - [] Validate inputsd
 - [] Exit in a way python treats as an error
 - [] Publish to Pypi
+- [] Trim code what's needed and rename dt prefixes
