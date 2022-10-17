@@ -62,7 +62,7 @@ static void error(char * msg)
 // Thanks to Marcus for his support when implementing part of the ShiftN functionality
 // to darktable.
 
-#define ROTATION_RANGE 180                   // allowed min/max default range for rotation parameter
+#define ROTATION_RANGE 1.5                  // allowed min/max default range for rotation parameter
 #define LENSSHIFT_RANGE 2.0                 // allowed min/max default range for lensshift parameters
 #define SHEAR_RANGE 0.5                     // allowed min/max range for shear parameter
 #define MIN_LINE_LENGTH 5                   // the minimum length of a line in pixels to be regarded as relevant
