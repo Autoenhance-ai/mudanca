@@ -7,17 +7,6 @@ import array
 import cv2
 import numpy as np
 
-LSD_SCALE = 0.99                # LSD: scaling factor for line detection
-LSD_SIGMA_SCALE = 0.6           # LSD: sigma for Gaussian filter is computed as sigma = sigma_scale/scale
-LSD_QUANT = 2.0                 # LSD: bound to the quantization error on the gradient norm
-LSD_ANG_TH = 22.5               # LSD: gradient angle tolerance in degrees
-LSD_LOG_EPS = 0.0               # LSD: detection threshold: -log10(NFA) > log_eps
-LSD_DENSITY_TH = 0.7            # LSD: minimal density of region points in rectangle
-LSD_N_BINS = 1024               # LSD: number of bins in pseudo-ordering of gradient modulus
-LINE_DETECTION_MARGIN = 5       # Size of the margin from the border of the image where lines will be discarded
-MIN_LINE_LENGTH = 5             # the minimum length of a line in pixels to be regarded as relevant
-MAX_TANGENTIAL_DEVIATION = 30   # by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
-
 FIT_NONE         = 0         #no Adjustments
 FIT_ROTATION     = 1 << 0    # flag indicates to fit rotation angle
 FIT_LENS_VERT    = 1 << 1    # flag indicates to fit vertical lens shift
@@ -39,27 +28,9 @@ FIT_ROTATION_HORIZONTAL_LINES = FIT_ROTATION | FIT_LINES_HOR
 FIT_ROTATION_BOTH_LINES = FIT_ROTATION | FIT_LINES_VERT | FIT_LINES_HOR
 FIT_FLIP = FIT_LENS_VERT | FIT_LENS_HOR | FIT_LINES_VERT | FIT_LINES_HOR
 
-def adjust(img, options, refine=cv2.LSD_REFINE_STD):
+def adjust(lines, size, options):
 
-    if len(img.shape) != 2:
-        raise Exception('Image must be grayscale')
-
-    if img.dtype != np.uint8:
-        raise Exception('Image must be a type of uint8')
-
-    lsd = cv2.createLineSegmentDetector(
-        refine,
-        LSD_SCALE,
-        LSD_SIGMA_SCALE, 
-        LSD_QUANT,
-        LSD_ANG_TH,
-        LSD_LOG_EPS,
-        LSD_DENSITY_TH,
-        LSD_N_BINS
-    )
-
-    lines, widths, precision, _ = lsd.detect(img)
-    height, width = img.shape
+    width, height = size
 
     if lines is None:
         return None
@@ -79,8 +50,8 @@ def adjust(img, options, refine=cv2.LSD_REFINE_STD):
         rect.x2 = x2
         rect.y2 = y2
 
-        rect.width = widths[line_id]
-        rect.precision = precision[line_id]
+        rect.width = 1.0
+        rect.precision = 1.0
 
         rects[line_id] = rect
 

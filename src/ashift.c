@@ -62,7 +62,7 @@ static void error(char * msg)
 // Thanks to Marcus for his support when implementing part of the ShiftN functionality
 // to darktable.
 
-#define ROTATION_RANGE 1.5                  // allowed min/max default range for rotation parameter
+#define ROTATION_RANGE 5                    // allowed min/max default range for rotation parameter
 #define LENSSHIFT_RANGE 2.0                 // allowed min/max default range for lensshift parameters
 #define SHEAR_RANGE 0.5                     // allowed min/max range for shear parameter
 #define MIN_LINE_LENGTH 5                   // the minimum length of a line in pixels to be regarded as relevant
@@ -406,16 +406,23 @@ static int line_prcoess(
       ashift_lines[lct].length = sqrt((px2 - px1) * (px2 - px1) + (py2 - py1) * (py2 - py1));
       ashift_lines[lct].width = line.width / scale;
 
-      // ...  and weight (= length * width * angle precision)
-      const float weight = ashift_lines[lct].length * ashift_lines[lct].width * line.precision;
-      ashift_lines[lct].weight = weight;
-
-
       const float angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
+
+      // ...  and weight (= length * width * angle precision)
+      const float weight = fabs(angle) * ashift_lines[lct].length; 
+      //ashift_lines[lct].length * ashift_lines[lct].width * line.precision;
+      ashift_lines[lct].weight = weight; 
+
       const int vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
       const int horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
 
-      const int relevant = ashift_lines[lct].length > MIN_LINE_LENGTH ? 1 : 0;
+      const float rangle = fabs(angle);
+
+      const int relevant = ashift_lines[lct].length > 5.0f && rangle >= 80.0f && rangle <= 100.0f ? 1 : 0;
+
+      if (vertical) {
+        printf("ANG: %f - REL: %i - LEN: %f - WEIGHT: %f \n", rangle, relevant, ashift_lines[lct].length, weight);
+      }
 
       // register type of line
       shift_iop_ashift_linetype_t type = ASHIFT_LINE_IRRELEVANT;
@@ -431,6 +438,7 @@ static int line_prcoess(
         horizontal_count++;
         horizontal_weight += weight;
       }
+
       ashift_lines[lct].type = type;
 
       // the next valid line
@@ -1105,6 +1113,13 @@ float * shift(
     flatMatrix[6] = homograph[2][0];
     flatMatrix[7] = homograph[2][1];
     flatMatrix[8] = homograph[2][2]; 
+
+    #ifdef ASHIFT_DEBUG
+    printf("ROT: %f\n", p.rotation);
+    printf("LV: %f\n", p.lensshift_v);
+    printf("LH: %f\n", p.lensshift_h);
+    printf("SHR: %f\n", p.shear);
+    #endif
 
     return flatMatrix;
   };
