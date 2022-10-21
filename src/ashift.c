@@ -66,7 +66,7 @@ static void error(char * msg)
 #define LENSSHIFT_RANGE 2.0                 // allowed min/max default range for lensshift parameters
 #define SHEAR_RANGE 0.5                     // allowed min/max range for shear parameter
 #define MIN_LINE_LENGTH 5                   // the minimum length of a line in pixels to be regarded as relevant
-#define MAX_TANGENTIAL_DEVIATION 30         // by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
+#define MAX_TANGENTIAL_DEVIATION 10         // by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 #define MINIMUM_FITLINES 2                  // minimum number of lines needed for automatic parameter fit
 #define NMS_EPSILON 1e-3                    // break criterion for Nelder-Mead simplex
 #define NMS_SCALE 1.0                       // scaling factor for Nelder-Mead simplex
@@ -416,13 +416,7 @@ static int line_prcoess(
       const int vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
       const int horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
 
-      const float rangle = fabs(angle);
-
-      const int relevant = ashift_lines[lct].length > 5.0f && rangle >= 80.0f && rangle <= 100.0f ? 1 : 0;
-
-      if (vertical) {
-        printf("ANG: %f - REL: %i - LEN: %f - WEIGHT: %f \n", rangle, relevant, ashift_lines[lct].length, weight);
-      }
+      const int relevant = ashift_lines[lct].length > MIN_LINE_LENGTH ? 1 : 0;
 
       // register type of line
       shift_iop_ashift_linetype_t type = ASHIFT_LINE_IRRELEVANT;
