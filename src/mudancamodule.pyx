@@ -7,10 +7,10 @@ import array
 import cv2
 import numpy as np
 
-FIT_NONE         = 0         #no Adjustments
-FIT_ROTATION     = 1 << 0    # flag indicates to fit rotation angle
-FIT_LENS_VERT    = 1 << 1    # flag indicates to fit vertical lens shift
-FIT_LENS_HOR     = 1 << 2    # flag indicates to fit horizontal lens shift
+FIT_NONE         = 0        #no Adjustments
+FIT_ROTATION     = 1 << 0   # flag indicates to fit rotation angle
+FIT_LENS_VERT    = 1 << 1   # flag indicates to fit vertical lens shift
+FIT_LENS_HOR     = 1 << 2   # flag indicates to fit horizontal lens shift
 FIT_SHEAR        = 1 << 3   # flag indicates to fit shear parameter
 FIT_LINES_VERT   = 1 << 4   # use vertical lines for fitting
 FIT_LINES_HOR    = 1 << 5   # use horizontal lines for fitting
@@ -41,7 +41,7 @@ def adjust(lines, size, options):
 
     for line_id in range(line_count):
 
-        x1, y1, x2, y2 = lines[line_id, 0]
+        x1, y1, x2, y2 = lines[line_id]
 
         rect: ashift.rect = rects[line_id] 
 
