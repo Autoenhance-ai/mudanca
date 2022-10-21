@@ -8,7 +8,7 @@ module = Extension('mudanca', sources = [
 ])
 
 setup (name = 'mudanca',
-       version = '1.2.1',
+       version = '1.3',
        author="James Campbell",
        description = 'An implementation of the shift algorithmn for python ported from Darktable & Nshift',
        ext_modules = cythonize([module], compiler_directives={'language_level' : "3"}),
