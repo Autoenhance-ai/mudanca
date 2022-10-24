@@ -1080,12 +1080,12 @@ float * shift(
       case NMS_NOT_ENOUGH_LINES:
         printf("Not enough structure for automatic correction\nminimum %d lines in each relevant direction\n",
             MINIMUM_FITLINES);
-        error("Failed: Not enough lines");
+        printf("Failed: Not enough lines");
         break;
       case NMS_DID_NOT_CONVERGE:
       case NMS_INSANE:
         printf("automatic correction failed, please correct manually\n");
-        error("Failed: No convergence or insane");
+        printf("Failed: No convergence or insane");
         break;
       case NMS_SUCCESS:
       default:
