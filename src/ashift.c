@@ -409,7 +409,7 @@ static int line_prcoess(
       const float angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
 
       // ...  and weight (= length * width * angle precision)
-      const float weight = ashift_lines[lct].length * ashift_lines[lct].width * lsd_lines[n * 7 + 5];
+      const float weight = ashift_lines[lct].length * ashift_lines[lct].width * rects[n].precision;
       ashift_lines[lct].weight = weight; 
 
       const float weight = fabs(angle) * ashift_lines[lct].length; 
