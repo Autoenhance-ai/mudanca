@@ -409,10 +409,10 @@ static int line_prcoess(
       const float angle = atan2f(py2 - py1, px2 - px1) / M_PI * 180.0f;
 
       // ...  and weight (= length * width * angle precision)
-      const float weight = fabs(angle) * ashift_lines[lct].length; 
-      //ashift_lines[lct].length * ashift_lines[lct].width * line.precision;
+      const float weight = ashift_lines[lct].length * ashift_lines[lct].width * lsd_lines[n * 7 + 5];
       ashift_lines[lct].weight = weight; 
 
+      const float weight = fabs(angle) * ashift_lines[lct].length; 
       const int vertical = fabsf(fabsf(angle) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
       const int horizontal = fabsf(fabsf(fabsf(angle) - 90.0f) - 90.0f) < MAX_TANGENTIAL_DEVIATION ? 1 : 0;
 
