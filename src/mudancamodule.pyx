@@ -3,6 +3,7 @@ cimport ashift
 from cpython cimport array
 from libc.stdlib cimport malloc, free
 
+from dataclasses import dataclass
 import array
 import cv2
 import numpy as np
