@@ -28,6 +28,17 @@ FIT_ROTATION_HORIZONTAL_LINES = FIT_ROTATION | FIT_LINES_HOR
 FIT_ROTATION_BOTH_LINES = FIT_ROTATION | FIT_LINES_VERT | FIT_LINES_HOR
 FIT_FLIP = FIT_LENS_VERT | FIT_LENS_HOR | FIT_LINES_VERT | FIT_LINES_HOR
 
+@dataclass
+class Line:
+    x1: float
+    x2: float
+
+    y1: float
+    y2: float
+
+    width: float = 1.0
+    precision: float = 1.0
+
 def adjust(lines, size, options):
 
     width, height = size
@@ -35,23 +46,21 @@ def adjust(lines, size, options):
     if lines is None:
         return None
 
-    line_count: int = lines.shape[0]
+    line_count: int = len(lines)
 
     cdef ashift.rect * rects = <ashift.rect*>malloc(sizeof(ashift.rect) * line_count)
 
-    for line_id in range(line_count):
-
-        x1, y1, x2, y2 = lines[line_id]
+    for line_id, line in enumerate(lines):
 
         rect: ashift.rect = rects[line_id] 
 
-        rect.x1 = x1
-        rect.y1 = y1
-        rect.x2 = x2
-        rect.y2 = y2
+        rect.x1 = line.x1
+        rect.y1 = line.y1
+        rect.x2 = line.x2
+        rect.y2 = line.y2
 
-        rect.width = 1.0
-        rect.precision = 1.0
+        rect.width = line.width
+        rect.precision = line.precision
 
         rects[line_id] = rect
 
