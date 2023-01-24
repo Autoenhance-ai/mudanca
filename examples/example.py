@@ -15,6 +15,15 @@ lines[:,2] *= width
 lines[:,1] *= height
 lines[:,3] *= height
 
+lines = [
+    mudanca.Line(
+        line[0][0],
+        line[0][1],
+        line[0][2],
+        line[0][3],
+    ) for line in lines
+]
+
 matrix, cropbox = mudanca.adjust(lines, (width, height), mudanca.FIT_VERTICALLY)
 
 x1, y1 = cropbox[0]

@@ -32,9 +32,9 @@ FIT_FLIP = FIT_LENS_VERT | FIT_LENS_HOR | FIT_LINES_VERT | FIT_LINES_HOR
 @dataclass
 class Line:
     x1: float
-    x2: float
-
     y1: float
+
+    x2: float
     y2: float
 
     width: float = 1.0
