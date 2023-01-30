@@ -62,11 +62,11 @@ static void error(char * msg)
 // Thanks to Marcus for his support when implementing part of the ShiftN functionality
 // to darktable.
 
-#define ROTATION_RANGE 5                    // allowed min/max default range for rotation parameter
-#define LENSSHIFT_RANGE 2.0                 // allowed min/max default range for lensshift parameters
+#define ROTATION_RANGE 10                    // allowed min/max default range for rotation parameter
+#define LENSSHIFT_RANGE 1.0                 // allowed min/max default range for lensshift parameters
 #define SHEAR_RANGE 0.5                     // allowed min/max range for shear parameter
 #define MIN_LINE_LENGTH 5                   // the minimum length of a line in pixels to be regarded as relevant
-#define MAX_TANGENTIAL_DEVIATION 10         // by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
+#define MAX_TANGENTIAL_DEVIATION 30         // by how many degrees a line may deviate from the +/-180 and +/-90 to be regarded as relevant
 #define MINIMUM_FITLINES 2                  // minimum number of lines needed for automatic parameter fit
 #define NMS_EPSILON 1e-3                    // break criterion for Nelder-Mead simplex
 #define NMS_SCALE 1.0                       // scaling factor for Nelder-Mead simplex
