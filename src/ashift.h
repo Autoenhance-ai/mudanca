@@ -1,3 +1,8 @@
+typedef struct request {
+  
+}
+
+
 typedef struct rect
 {
   double x1,y1,x2,y2;  /* first and second point of the line segment */

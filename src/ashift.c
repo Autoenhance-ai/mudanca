@@ -1013,6 +1013,329 @@ static shift_iop_ashift_nmsresult_t nmsfit(shift_iop_ashift_gui_data_t *g, shift
   return NMS_SUCCESS;
 }
 
+#define RANSAC_RUNS 400                     // how many iterations to run in ransac
+#define RANSAC_EPSILON 2                    // starting value for ransac epsilon (in -log10 units)
+#define RANSAC_EPSILON_STEP 1               // step size of epsilon optimization (log10 units)
+#define RANSAC_ELIMINATION_RATIO 60         // percentage of lines we try to eliminate as outliers
+#define RANSAC_OPTIMIZATION_STEPS 5         // home many steps to optimize epsilon
+#define RANSAC_OPTIMIZATION_DRY_RUNS 50     // how man runs per optimization steps
+#define RANSAC_HURDLE 5                     // hurdle rate: the number of lines below which we do a complete permutation instead of random sampling
+
+
+// do complete permutations
+static int quickperm(int *a, int *p, const int N, int *i)
+{
+  if(*i >= N) return FALSE;
+
+  p[*i]--;
+  int j = (*i % 2 == 1) ? p[*i] : 0;
+  swap(&a[j], &a[*i]);
+  *i = 1;
+  while(p[*i] == 0)
+  {
+    p[*i] = *i;
+    (*i)++;
+  }
+  return TRUE;
+}
+
+// Fisher-Yates shuffle
+static void shuffle(int *a, const int N)
+{
+  for(int i = 0; i < N; i++)
+  {
+    int j = i + rand() % (N - i);
+    swap(&a[j], &a[i]);
+  }
+}
+
+// We use a pseudo-RANSAC algorithm to elminiate ouliers from our set of lines. The
+// original RANSAC works on linear optimization problems. Our model is nonlinear. We
+// take advantage of the fact that lines interesting for our model are vantage lines
+// that meet in one vantage point for each subset of lines (vertical/horizontal).
+// Strategy: we construct a model by (random) sampling within the subset of lines and
+// calculate the vantage point. Then we check the "distance" of all other lines to the
+// vantage point. The model that gives highest number of lines combined with the highest
+// total weight and lowest overall "distance" wins.
+// Disadvantage: compared to the original RANSAC we don't get any model parameters that
+// we could use for the following NMS fit.
+// Self-tuning: we optimize "epsilon", the hurdle rate to reject a line as an outlier,
+// by a number of dry runs first. The target average percentage value of lines to eliminate as
+// outliers (without judging on the quality of the model) is given by RANSAC_ELIMINATION_RATIO,
+// note: the actual percentage of outliers removed in the final run will be lower because we
+// will finally look for the best quality model with the optimized epsilon and that quality value also
+// encloses the number of good lines
+static void ransac(const shift_iop_ashift_line_t *lines, int *index_set, int *inout_set,
+                  const int set_count, const float total_weight, const int xmin, const int xmax,
+                  const int ymin, const int ymax)
+{
+  if(set_count < 3) return;
+
+  const size_t set_size = set_count * sizeof(int);
+  int *best_set = malloc(set_size);
+  memcpy(best_set, index_set, set_size);
+  int *best_inout = calloc(1, set_size);
+
+  float best_quality = 0.0f;
+
+  // hurdle value epsilon for rejecting a line as an outlier will be self-tuning
+  // in a number of dry runs
+  float epsilon = powf(10.0f, -RANSAC_EPSILON);
+  float epsilon_step = RANSAC_EPSILON_STEP;
+  // some accounting variables for self-tuning
+  int lines_eliminated = 0;
+  int valid_runs = 0;
+
+  // number of runs to optimize epsilon
+  const int optiruns = RANSAC_OPTIMIZATION_STEPS * RANSAC_OPTIMIZATION_DRY_RUNS;
+  // go for complete permutations on small set sizes, else for random sample consensus
+  const int riter = (set_count > RANSAC_HURDLE) ? RANSAC_RUNS : fact(set_count);
+
+  // some data needed for quickperm
+  int *perm = malloc(sizeof(int) * (set_count + 1));
+  for(int n = 0; n < set_count + 1; n++) perm[n] = n;
+  int piter = 1;
+
+  // inout holds good/bad qualification for each line
+  int *inout = malloc(set_size);
+
+  for(int r = 0; r < optiruns + riter; r++)
+  {
+    // get random or systematic variation of index set
+    if(set_count > RANSAC_HURDLE || r < optiruns)
+      shuffle(index_set, set_count);
+    else
+      (void)quickperm(index_set, perm, set_count, &piter);
+
+    // summed quality evaluation of this run
+    float quality = 0.0f;
+
+    // we build a model ouf of the first two lines
+    const float *L1 = lines[index_set[0]].L;
+    const float *L2 = lines[index_set[1]].L;
+
+    // get intersection point (ideally a vantage point)
+    float V[3];
+    vec3prodn(V, L1, L2);
+
+    // catch special cases:
+    // a) L1 and L2 are identical -> V is NULL -> no valid vantage point
+    // b) vantage point lies inside image frame (no chance to correct for this case)
+    if(vec3isnull(V) ||
+       (fabsf(V[2]) > 0.0f &&
+        V[0]/V[2] >= xmin &&
+        V[1]/V[2] >= ymin &&
+        V[0]/V[2] <= xmax &&
+        V[1]/V[2] <= ymax))
+    {
+      // no valid model
+      quality = 0.0f;
+    }
+    else
+    {
+      // valid model
+
+      // normalize V so that x^2 + y^2 + z^2 = 1
+      vec3norm(V, V);
+
+      // the two lines constituting the model are part of the set
+      inout[0] = 1;
+      inout[1] = 1;
+
+      // go through all remaining lines, check if they are within the model, and
+      // mark that fact in inout[].
+      // summarize a quality parameter for all lines within the model
+      for(int n = 2; n < set_count; n++)
+      {
+        // L is normalized so that x^2 + y^2 = 1
+        const float *L3 = lines[index_set[n]].L;
+
+        // we take the absolute value of the dot product of V and L as a measure
+        // of the "distance" between point and line. Note that this is not the real euclidean
+        // distance but - with the given normalization - just a pragmatically selected number
+        // that goes to zero if V lies on L and increases the more V and L are apart
+        const float d = fabsf(vec3scalar(V, L3));
+
+        // depending on d we either include or exclude the point from the set
+        inout[n] = (d < epsilon) ? 1 : 0;
+
+        float q;
+
+        if(inout[n] == 1)
+        {
+          // a quality parameter that depends 1/3 on the number of lines within the model,
+          // 1/3 on their weight, and 1/3 on their weighted distance d to the vantage point
+          q = 0.33f / (float)set_count
+              + 0.33f * lines[index_set[n]].weight / total_weight
+              + 0.33f * (1.0f - d / epsilon) * (float)set_count * lines[index_set[n]].weight / total_weight;
+        }
+        else
+        {
+          q = 0.0f;
+          lines_eliminated++;
+        }
+
+        quality += q;
+      }
+      valid_runs++;
+    }
+
+    if(r < optiruns)
+    {
+      // on last run of each self-tuning step
+      if((r % RANSAC_OPTIMIZATION_DRY_RUNS) == (RANSAC_OPTIMIZATION_DRY_RUNS - 1) && (valid_runs > 0))
+      {
+#ifdef ASHIFT_DEBUG
+        printf("ransac self-tuning (run %d): epsilon %f", r, epsilon);
+#endif
+        // average ratio of lines that we eliminated with the given epsilon
+        float ratio = 100.0f * (float)lines_eliminated / ((float)set_count * valid_runs);
+        // adjust epsilon accordingly
+        if(ratio < RANSAC_ELIMINATION_RATIO)
+          epsilon = powf(10.0f, log10(epsilon) - epsilon_step);
+        else if(ratio > RANSAC_ELIMINATION_RATIO)
+          epsilon = powf(10.0f, log10(epsilon) + epsilon_step);
+#ifdef ASHIFT_DEBUG
+        printf(" (elimination ratio %f) -> %f\n", ratio, epsilon);
+#endif
+        // reduce step-size for next optimization round
+        epsilon_step /= 2.0f;
+        lines_eliminated = 0;
+        valid_runs = 0;
+      }
+    }
+    else
+    {
+      // in the "real" runs check against the best model found so far
+      if(quality > best_quality)
+      {
+        memcpy(best_set, index_set, set_size);
+        memcpy(best_inout, inout, set_size);
+        best_quality = quality;
+      }
+    }
+
+#ifdef ASHIFT_DEBUG
+    // report some statistics
+    int count = 0, lastcount = 0;
+    for(int n = 0; n < set_count; n++) count += best_inout[n];
+    for(int n = 0; n < set_count; n++) lastcount += inout[n];
+    printf("ransac run %d: best qual %.6f, eps %.6f, line count %d of %d (this run: qual %.5f, count %d (%2f%%))\n", r,
+           best_quality, epsilon, count, set_count, quality, lastcount, 100.0f * lastcount / (float)set_count);
+#endif
+  }
+
+  // store back best set
+  memcpy(index_set, best_set, set_size);
+  memcpy(inout_set, best_inout, set_size);
+
+  free(inout);
+  free(perm);
+  free(best_inout);
+  free(best_set);
+}
+
+// try to clean up structural data by eliminating outliers and thereby increasing
+// the chance of a convergent fitting
+static int _remove_outliers( shift_iop_ashift_gui_data_t *g)
+{
+
+  const int width = g->lines_in_width;
+  const int height = g->lines_in_height;
+  const int xmin = g->lines_x_off;
+  const int ymin = g->lines_y_off;
+  const int xmax = xmin + width;
+  const int ymax = ymin + height;
+
+  // holds the index set of lines we want to work on
+  int *lines_set = malloc(sizeof(int) * g->lines_count);
+  // holds the result of ransac
+  int *inout_set = malloc(sizeof(int) * g->lines_count);
+
+  // some accounting variables
+  int vnb = 0, vcount = 0;
+  int hnb = 0, hcount = 0;
+
+  // just to be on the safe side
+  if(g->lines == NULL) goto error;
+
+  // generate index list for the vertical lines
+  for(int n = 0; n < g->lines_count; n++)
+  {
+    // is this a selected vertical line?
+    if((g->lines[n].type & ASHIFT_LINE_MASK) != ASHIFT_LINE_VERTICAL_SELECTED)
+      continue;
+
+    lines_set[vnb] = n;
+    inout_set[vnb] = 0;
+    vnb++;
+  }
+
+  // it only makes sense to call ransac if we have more than two lines
+  if(vnb > 2)
+    ransac(g->lines, lines_set, inout_set, vnb, g->vertical_weight,
+           xmin, xmax, ymin, ymax);
+
+  // adjust line selected flag according to the ransac results
+  for(int n = 0; n < vnb; n++)
+  {
+    const int m = lines_set[n];
+    if(inout_set[n] == 1)
+    {
+      g->lines[m].type |= ASHIFT_LINE_SELECTED;
+      vcount++;
+    }
+    else
+      g->lines[m].type &= ~ASHIFT_LINE_SELECTED;
+  }
+  // update number of vertical lines
+  g->vertical_count = vcount;
+  g->lines_version++;
+
+  // now generate index list for the horizontal lines
+  for(int n = 0; n < g->lines_count; n++)
+  {
+    // is this a selected horizontal line?
+    if((g->lines[n].type & ASHIFT_LINE_MASK) != ASHIFT_LINE_HORIZONTAL_SELECTED)
+      continue;
+
+    lines_set[hnb] = n;
+    inout_set[hnb] = 0;
+    hnb++;
+  }
+
+  // it only makes sense to call ransac if we have more than two lines
+  if(hnb > 2)
+    ransac(g->lines, lines_set, inout_set, hnb, g->horizontal_weight,
+           xmin, xmax, ymin, ymax);
+
+  // adjust line selected flag according to the ransac results
+  for(int n = 0; n < hnb; n++)
+  {
+    const int m = lines_set[n];
+    if(inout_set[n] == 1)
+    {
+      g->lines[m].type |= ASHIFT_LINE_SELECTED;
+      hcount++;
+    }
+    else
+      g->lines[m].type &= ~ASHIFT_LINE_SELECTED;
+  }
+  // update number of horizontal lines
+  g->horizontal_count = hcount;
+  g->lines_version++;
+
+  free(inout_set);
+  free(lines_set);
+
+  return TRUE;
+
+error:
+  free(inout_set);
+  free(lines_set);
+  return FALSE;
+}
+
 float * shift(
     float width, float height,
     int input_line_count,
@@ -1070,6 +1393,8 @@ float * shift(
     p.cr = 1.0;
     p.ct = 0.0;
     p.cb = 1.0;
+
+    _remove_outliers(&g);
 
     shift_iop_ashift_fitaxis_t dir = options;
     shift_iop_ashift_nmsresult_t res = nmsfit(&g, &p, dir);
